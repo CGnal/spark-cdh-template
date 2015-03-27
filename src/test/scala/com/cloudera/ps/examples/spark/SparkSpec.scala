@@ -88,7 +88,6 @@ class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
       val data = sqlContext.avroFile(output)
       data.registerTempTable("teenagers")
       sqlContext.sql("select * from teenagers").collect().toList.toString must be("List([Ruben,14], [Vita,19])")
-
     }
   }
 

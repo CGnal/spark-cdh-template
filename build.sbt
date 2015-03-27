@@ -59,12 +59,12 @@ libraryDependencies ++= Seq(
   "org.scalatest" % "scalatest_2.10" % scalaTestVersion % "test"
 )
 
-run in Compile <<= Defaults.runTask(fullClasspath in Compile, mainClass in (Compile, run), runner in (Compile, run))
+run in Compile <<= Defaults.runTask(fullClasspath in Compile, mainClass in(Compile, run), runner in(Compile, run))
 
 fork := true
 
-lazy val root = (project in file(".")).
-  configs(IntegrationTest).
-  settings(Defaults.itSettings: _*)
+lazy val root = (project in file(".")).settings(Defaults.itSettings: _*).configs(config("it").extend(Test))
+
+lazy val IntegrationTest = config("it").extend(Test)
 
 net.virtualvoid.sbt.graph.Plugin.graphSettings
