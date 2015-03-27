@@ -4,7 +4,7 @@ import org.apache.spark.{ SparkConf, SparkContext }
 
 object Main extends App {
 
-  val yarn = true
+  val yarn = false
 
   val conf =
     if (yarn)
