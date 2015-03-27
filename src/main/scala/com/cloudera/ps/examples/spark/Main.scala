@@ -1,17 +1,25 @@
 package com.cloudera.ps.examples.spark
 
+import com.databricks.spark.avro.AvroSaver
+import org.apache.avro.generic.GenericRecord
+import org.apache.avro.mapred.AvroInputFormat
 import org.apache.spark.{ SparkConf, SparkContext }
 
 object Main extends App {
 
-  val yarn = false
+  val yarn = true
+
+  def getJar(klass: Class[_]): String = {
+    val codeSource = klass.getProtectionDomain().getCodeSource()
+    codeSource.getLocation.getPath
+  }
 
   val conf =
     if (yarn)
       new SparkConf().
         setAppName("spark-cdh5-template-yarn").
         set("executor-memory", "128m").
-        setJars(List(s"${System.getProperty("user.dir")}/target/scala-2.10/spark-cdh5-template-assembly-1.0.jar")).
+        setJars(List(getJar(AvroSaver.getClass), getJar(classOf[AvroInputFormat[GenericRecord]]))).
         set("spark.yarn.jar", "hdfs:///user/spark/share/lib/spark-assembly.jar").
         setMaster("yarn-client")
     else
