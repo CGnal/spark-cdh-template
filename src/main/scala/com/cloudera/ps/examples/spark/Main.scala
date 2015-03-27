@@ -10,7 +10,7 @@ object Main extends App {
   val yarn = true
 
   def getJar(klass: Class[_]): String = {
-    val codeSource = klass.getProtectionDomain().getCodeSource()
+    val codeSource = klass.getProtectionDomain.getCodeSource
     codeSource.getLocation.getPath
   }
 

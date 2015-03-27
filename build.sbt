@@ -45,8 +45,7 @@ val avroVersion = "1.7.6-cdh5.3.3"
 val scalaTestVersion = "2.2.4"
 
 resolvers ++= Seq(
-  "cloudera" at "https://repository.cloudera.com/artifactory/cloudera-repos/",
-  Resolver.mavenLocal
+  "cloudera" at "https://repository.cloudera.com/artifactory/cloudera-repos/"
 )
 
 libraryDependencies ++= Seq(
@@ -63,5 +62,9 @@ libraryDependencies ++= Seq(
 run in Compile <<= Defaults.runTask(fullClasspath in Compile, mainClass in (Compile, run), runner in (Compile, run))
 
 fork := true
+
+lazy val root = (project in file(".")).
+  configs(IntegrationTest).
+  settings(Defaults.itSettings: _*)
 
 net.virtualvoid.sbt.graph.Plugin.graphSettings
