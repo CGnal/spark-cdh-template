@@ -1,10 +1,10 @@
 package com.cloudera.ps.examples.spark
 
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.{ SparkConf, SparkContext }
 
 object Main extends App {
 
-  val yarn = false
+  val yarn = true
 
   val conf =
     if (yarn)

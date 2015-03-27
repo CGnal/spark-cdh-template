@@ -1,12 +1,38 @@
-import sbtassembly.Plugin.AssemblyKeys._
-
-assemblySettings
-
 name := "spark-cdh5-template"
 
 version := "1.0"
 
 scalaVersion := "2.10.5"
+
+scalariformSettings
+
+scalastyleFailOnError := true
+
+dependencyUpdatesExclusions := moduleFilter(organization = "org.scala-lang")
+
+scalacOptions ++= Seq(
+  "-deprecation",
+  "-encoding", "UTF-8", // yes, this is 2 args
+  "-feature",
+  "-unchecked",
+  "-Xfatal-warnings",
+  "-Xlint",
+  "-Yno-adapted-args",
+  "-Ywarn-numeric-widen",
+  "-Ywarn-value-discard",
+  "-Xfuture"
+)
+
+wartremoverErrors ++= Seq(
+  Wart.Any,
+  Wart.Any2StringAdd,
+  Wart.EitherProjectionPartial,
+  Wart.OptionPartial,
+  Wart.Product,
+  Wart.Serializable,
+  Wart.ListOps,
+  Wart.Nothing
+)
 
 val sparkVersion = "1.2.0-cdh5.3.3"
 
@@ -36,7 +62,7 @@ libraryDependencies ++= Seq(
 
 run in Compile <<= Defaults.runTask(fullClasspath in Compile, mainClass in (Compile, run), runner in (Compile, run))
 
-mergeStrategy in assembly <<= (mergeStrategy in assembly) { mergeStrategy => {
+assemblyMergeStrategy in assembly <<= (assemblyMergeStrategy in assembly) { mergeStrategy => {
   case entry => {
     val strategy = mergeStrategy(entry)
     if (strategy == MergeStrategy.deduplicate) MergeStrategy.first

@@ -2,13 +2,14 @@ package com.cloudera.ps.examples.spark
 
 import com.databricks.spark.avro.AvroSaver
 import org.apache.avro.generic.GenericRecord
-import org.apache.avro.mapred.{AvroInputFormat, AvroWrapper}
+import org.apache.avro.mapred.{ AvroInputFormat, AvroWrapper }
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.io.NullWritable
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SQLContext
-import org.apache.spark.{SparkConf, SparkContext}
-import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
+import org.apache.spark.{ SparkConf, SparkContext }
+import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 
 case class Person(name: String, age: Int)
 
@@ -48,11 +49,12 @@ class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
 
       val input = s"file://${System.getProperty("user.dir")}/src/test/resources/test.avro"
 
-      val rdd = sparkContext.hadoopFile(
+      val rdd = sparkContext.hadoopFile[AvroWrapper[GenericRecord], NullWritable](
         input,
         classOf[AvroInputFormat[GenericRecord]],
         classOf[AvroWrapper[GenericRecord]],
-        classOf[NullWritable])
+        classOf[NullWritable]
+      )
 
       val rows = rdd.map(gr => gr._1.datum().get("b").toString)
 
@@ -77,7 +79,7 @@ class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
         fileSystem.delete(dir, true)
 
       val peopleList = List(Person("David", 50), Person("Ruben", 14), Person("Giuditta", 12), Person("Vita", 19))
-      val people = sparkContext.parallelize(peopleList)
+      val people = sparkContext.parallelize[Person](peopleList)
       people.registerTempTable("people")
       val teenagers = sqlContext.sql("SELECT * FROM people WHERE age >= 13 AND age <= 19")
       AvroSaver.save(teenagers, output)
