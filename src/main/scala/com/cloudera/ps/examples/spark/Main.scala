@@ -7,7 +7,7 @@ import org.apache.spark.{ SparkConf, SparkContext }
 
 object Main extends App {
 
-  val yarn = true
+  val yarn = false
 
   def getJar(klass: Class[_]): String = {
     val codeSource = klass.getProtectionDomain.getCodeSource
