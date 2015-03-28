@@ -40,6 +40,8 @@ val sparkVersion = "1.2.0-cdh5.3.3"
 
 val hadoopVersion = "2.5.0-cdh5.3.3"
 
+val sparkAvroVersion = "0.2.0"
+
 val avroVersion = "1.7.6-cdh5.3.3"
 
 val scalaTestVersion = "2.2.4"
@@ -52,7 +54,7 @@ libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-core" % sparkVersion % "compile" excludeAll ExclusionRule(organization = "org.apache.hadoop"),
   "org.apache.spark" %% "spark-sql" % sparkVersion % "compile" excludeAll ExclusionRule(organization = "org.apache.hadoop"),
   "org.apache.spark" %% "spark-yarn" % sparkVersion % "compile" excludeAll ExclusionRule(organization = "org.apache.hadoop"),
-  "com.databricks" % "spark-avro_2.10" % "0.2.0" % "compile" excludeAll ExclusionRule(organization = "org.apache.avro"),
+  "com.databricks" % "spark-avro_2.10" % sparkAvroVersion % "compile" excludeAll ExclusionRule(organization = "org.apache.avro"),
   "org.apache.avro" % "avro" % avroVersion % "compile" exclude("org.mortbay.jetty", "servlet-api") exclude("io.netty", "netty") exclude("org.apache.avro", "avro-ipc") exclude("org.mortbay.jetty", "jetty"),
   "org.apache.avro" % "avro-mapred" % avroVersion % "compile" exclude("org.mortbay.jetty", "servlet-api") exclude("io.netty", "netty") exclude("org.apache.avro", "avro-ipc") exclude("org.mortbay.jetty", "jetty"),
   "org.apache.hadoop" % "hadoop-client" % hadoopVersion % "compile" excludeAll ExclusionRule("javax.servlet"),
