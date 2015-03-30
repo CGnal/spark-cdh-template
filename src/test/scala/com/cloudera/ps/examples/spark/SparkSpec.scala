@@ -6,7 +6,8 @@ import org.apache.avro.mapred.{ AvroInputFormat, AvroWrapper }
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.io.NullWritable
-import org.apache.spark.sql.SQLContext
+import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.{ DataFrame, SQLContext }
 import org.apache.spark.{ SparkConf, SparkContext }
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 
@@ -63,10 +64,10 @@ class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
 
   "Spark" must {
     "save an schema rdd as an avro file correctly" in {
-      /*
+
       val sqlContext = new SQLContext(sparkContext)
 
-      import sqlContext.createSchemaRDD
+      import sqlContext.implicits._
 
       val output = s"file://${System.getProperty("user.dir")}/tmp/test.avro"
 
@@ -78,8 +79,9 @@ class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
         fileSystem.delete(dir, true)
 
       val peopleList = List(Person("David", 50), Person("Ruben", 14), Person("Giuditta", 12), Person("Vita", 19))
-      val people = sparkContext.parallelize[Person](peopleList)
+      val people = sparkContext.parallelize[Person](peopleList).toDF()
       people.registerTempTable("people")
+
       val teenagers = sqlContext.sql("SELECT * FROM people WHERE age >= 13 AND age <= 19")
       AvroSaver.save(teenagers, output)
 
@@ -87,7 +89,7 @@ class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
       import com.databricks.spark.avro._
       val data = sqlContext.avroFile(output)
       data.registerTempTable("teenagers")
-      sqlContext.sql("select * from teenagers").collect().toList.toString must be("List([Ruben,14], [Vita,19])") */
+      sqlContext.sql("select * from teenagers").collect().toList.toString must be("List([Ruben,14], [Vita,19])")
     }
   }
 
