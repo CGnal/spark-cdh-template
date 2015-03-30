@@ -2,14 +2,13 @@ package com.cloudera.ps.examples.spark
 
 import com.databricks.spark.avro.AvroSaver
 import org.apache.avro.generic.GenericRecord
-import org.apache.avro.mapred.{ AvroInputFormat, AvroWrapper }
+import org.apache.avro.mapred.{AvroInputFormat, AvroWrapper}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.io.NullWritable
-import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{ DataFrame, SQLContext }
-import org.apache.spark.{ SparkConf, SparkContext }
-import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
+import org.apache.spark.sql.SQLContext
+import org.apache.spark.{SparkConf, SparkContext}
+import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
 
 case class Person(name: String, age: Int)
 
