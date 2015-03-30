@@ -8,11 +8,11 @@
   </property>
   <property>
     <name>dfs.namenode.servicerpc-address</name>
-    <value>docker:8022</value>
+    <value>cdh-docker:8022</value>
   </property>
   <property>
     <name>dfs.https.address</name>
-    <value>docker:50470</value>
+    <value>cdh-docker:50470</value>
   </property>
   <property>
     <name>dfs.https.port</name>
@@ -20,11 +20,11 @@
   </property>
   <property>
     <name>dfs.namenode.http-address</name>
-    <value>docker:50070</value>
+    <value>cdh-docker:50070</value>
   </property>
   <property>
     <name>dfs.replication</name>
-    <value>3</value>
+    <value>1</value>
   </property>
   <property>
     <name>dfs.blocksize</name>
