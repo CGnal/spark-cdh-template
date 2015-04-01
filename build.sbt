@@ -25,6 +25,10 @@ scalacOptions ++= Seq(
   "-Xfuture"
 )
 
+javaOptions ++= Seq(
+  "-DK=V"
+)
+
 wartremoverErrors ++= Seq(
   Wart.Any,
   Wart.Any2StringAdd,
@@ -57,16 +61,16 @@ libraryDependencies ++= Seq(
   "com.databricks" % "spark-avro_2.10" % sparkAvroVersion % "compile" excludeAll ExclusionRule(organization = "org.apache.avro"),
   "org.apache.avro" % "avro" % avroVersion % "compile" exclude("org.mortbay.jetty", "servlet-api") exclude("io.netty", "netty") exclude("org.apache.avro", "avro-ipc") exclude("org.mortbay.jetty", "jetty"),
   "org.apache.avro" % "avro-mapred" % avroVersion % "compile" exclude("org.mortbay.jetty", "servlet-api") exclude("io.netty", "netty") exclude("org.apache.avro", "avro-ipc") exclude("org.mortbay.jetty", "jetty"),
-  "org.apache.hadoop" % "hadoop-client" % hadoopVersion % "compile" excludeAll ExclusionRule("javax.servlet"),
-  "org.scalatest" % "scalatest_2.10" % scalaTestVersion % "test"
+  "org.apache.hadoop" % "hadoop-client" % hadoopVersion % "compile" excludeAll ExclusionRule("javax.servlet")
 )
-
-run in Compile <<= Defaults.runTask(fullClasspath in Compile, mainClass in(Compile, run), runner in(Compile, run))
 
 fork := true
 
-lazy val root = (project in file(".")).settings(Defaults.itSettings: _*).configs(config("it").extend(Test))
-
-lazy val IntegrationTest = config("it").extend(Test)
+lazy val root = (project in file(".")).
+  configs(IntegrationTest).
+  settings(Defaults.itSettings: _*).
+  settings(
+    libraryDependencies += "org.scalatest" % "scalatest_2.10" % scalaTestVersion % "it,test"
+  )
 
 net.virtualvoid.sbt.graph.Plugin.graphSettings

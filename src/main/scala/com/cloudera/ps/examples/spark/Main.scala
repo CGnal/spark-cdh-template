@@ -1,18 +1,32 @@
 package com.cloudera.ps.examples.spark
 
+import java.io.File
+import java.net.{ URL, URLClassLoader }
+
 import com.databricks.spark.avro.AvroSaver
 import org.apache.avro.generic.GenericRecord
 import org.apache.avro.mapred.AvroInputFormat
+import org.apache.spark.rdd.RDD
 import org.apache.spark.{ SparkConf, SparkContext }
 
 object Main extends App {
 
-  val yarn = false
+  val yarn = true
 
+  //Simple function for adding a directory to the system classpath
+  def addPath(dir: String) = {
+    val method = classOf[URLClassLoader].getDeclaredMethod("addURL", classOf[URL])
+    method.setAccessible(true)
+    method.invoke(ClassLoader.getSystemClassLoader(), new File(dir).toURI().toURL())
+  }
+
+  //given a class it returns the jar (in the classpath) containing that class
   def getJar(klass: Class[_]): String = {
     val codeSource = klass.getProtectionDomain.getCodeSource
     codeSource.getLocation.getPath
   }
+
+  addPath(args(0)) //You can pass the HADOOP config directory as an option
 
   val conf =
     if (yarn)
@@ -28,25 +42,9 @@ object Main extends App {
         setMaster("local[16]")
 
   val sparkContext = new SparkContext(conf)
-
-  import org.apache.spark.sql._
-
-  val sqlContext = new SQLContext(sparkContext)
-
-  val input = if (conf.get("spark.app.name") == "spark-cdh5-template-yarn")
-    s"hdfs:///user/${System.getProperty("user.name")}/test.avro"
-  else
-    s"file://${System.getProperty("user.dir")}/src/test/resources/test.avro"
-
-  import com.databricks.spark.avro._
-
-  val data = sqlContext.avroFile(input)
-
-  data.registerTempTable("test")
-
-  val res = sqlContext.sql("select * from test where a < 10")
-
-  println(res.collect().toList)
+  val data = 1 to 100000
+  val rdd: RDD[Int] = sparkContext.parallelize[Int](data)
+  println(rdd.count())
 
   sparkContext.stop()
 
