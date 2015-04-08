@@ -1,8 +1,8 @@
 package com.cloudera.ps.examples.spark
 
-import com.databricks.spark.avro.AvroSaver
-import org.apache.avro.generic.GenericRecord
-import org.apache.avro.mapred.AvroInputFormat
+//import com.databricks.spark.avro.AvroSaver
+//import org.apache.avro.generic.GenericRecord
+//import org.apache.avro.mapred.AvroInputFormat
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.SQLContext
