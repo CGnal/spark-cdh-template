@@ -22,7 +22,8 @@ class SparkIntegrationSpec extends WordSpec with MustMatchers with BeforeAndAfte
     val conf = new SparkConf().
       setAppName("spark-cdh5-template-yarn").
       set("executor-memory", "128m").
-      setJars(List(getJar(AvroSaver.getClass), getJar(classOf[AvroInputFormat[GenericRecord]]))).
+      //setJars(List(getJar(AvroSaver.getClass), getJar(classOf[AvroInputFormat[GenericRecord]]))).
+      setJars(List(s"${System.getProperty("user.dir")}/assembly/target/scala-2.10/spark-cdh-template-assembly-1.0.jar")).
       set("spark.yarn.jar", "hdfs:///user/spark/share/lib/spark-assembly.jar").
       setMaster("yarn-client")
     sparkContext = new SparkContext(conf)
