@@ -2,9 +2,19 @@ import de.heikoseeberger.sbtheader.HeaderPattern
 import de.heikoseeberger.sbtheader.license.Apache2_0
 import sbt._
 
+<<<<<<< HEAD
 name := "spark-cdh5-template"
 
 version in ThisBuild := "1.0"
+=======
+organization := "me.davidgreco"
+
+name := "spark-cdh5-template"
+
+version in ThisBuild := "1.0"
+
+val assemblyName = "spark-cdh-template-assembly"
+>>>>>>> cdh5.4.0
 
 enablePlugins(JavaAppPackaging)
 
@@ -62,6 +72,7 @@ libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-core" % sparkVersion % "compile" excludeAll ExclusionRule(organization = "org.apache.hadoop"),
   "org.apache.spark" %% "spark-sql" % sparkVersion % "compile" excludeAll ExclusionRule(organization = "org.apache.hadoop"),
   "org.apache.spark" %% "spark-yarn" % sparkVersion % "compile" excludeAll ExclusionRule(organization = "org.apache.hadoop"),
+<<<<<<< HEAD
   "com.databricks" %% "spark-avro" % sparkAvroVersion % "compile" excludeAll ExclusionRule(organization = "org.apache.avro"),
   "org.apache.avro" % "avro" % avroVersion % "compile" exclude("org.mortbay.jetty", "servlet-api") exclude("io.netty", "netty") exclude("org.apache.avro", "avro-ipc") exclude("org.mortbay.jetty", "jetty"),
   "org.apache.avro" % "avro-mapred" % avroVersion % "compile" exclude("org.mortbay.jetty", "servlet-api") exclude("io.netty", "netty") exclude("org.apache.avro", "avro-ipc") exclude("org.mortbay.jetty", "jetty"),
@@ -69,6 +80,26 @@ libraryDependencies ++= Seq(
 )
 
 fork := true //http://stackoverflow.com/questions/27824281/sparksql-missingrequirementerror-when-registering-table
+
+parallelExecution in Test := false
+
+headers := Map(
+  "scala" ->(HeaderPattern.cStyleBlockComment, Apache2_0("2015", "David Greco")._2),
+  "conf" ->(HeaderPattern.hashLineComment, Apache2_0("2015", "David Greco")._2)
+)
+=======
+  "com.databricks" %% "spark-avro" % sparkAvroVersion % "provided" excludeAll ExclusionRule(organization = "org.apache.avro"),
+  "org.apache.avro" % "avro" % avroVersion % "provided" exclude("org.mortbay.jetty", "servlet-api") exclude("io.netty", "netty") exclude("org.apache.avro", "avro-ipc") exclude("org.mortbay.jetty", "jetty"),
+  "org.apache.avro" % "avro-mapred" % avroVersion % "provided" exclude("org.mortbay.jetty", "servlet-api") exclude("io.netty", "netty") exclude("org.apache.avro", "avro-ipc") exclude("org.mortbay.jetty", "jetty"),
+  "org.apache.hadoop" % "hadoop-client" % hadoopVersion % "compile" excludeAll ExclusionRule("javax.servlet")
+)
+
+//http://stackoverflow.com/questions/18838944/how-to-add-provided-dependencies-back-to-run-test-tasks-classpath/21803413#21803413
+run in Compile <<= Defaults.runTask(fullClasspath in Compile, mainClass in(Compile, run), runner in(Compile, run))
+
+//http://stackoverflow.com/questions/27824281/sparksql-missingrequirementerror-when-registering-table
+fork := true
+>>>>>>> cdh5.4.0
 
 parallelExecution in Test := false
 
@@ -86,8 +117,12 @@ lazy val root = (project in file(".")).
 
 lazy val assembly_ = (project in file("assembly")).
   settings(
+<<<<<<< HEAD
     ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) },
     assemblyJarName in assembly := s"spark-cdh-template-assembly-${version.value}.jar", //assembly-assembly-0.1-SNAPSHOT.jar
+=======
+    assemblyJarName in assembly := s"$assemblyName-${version.value}.jar",
+>>>>>>> cdh5.4.0
     libraryDependencies ++= Seq(
       "com.databricks" %% "spark-avro" % sparkAvroVersion % "compile" excludeAll ExclusionRule(organization = "org.apache.avro"),
       "org.apache.avro" % "avro" % avroVersion % "compile" exclude("org.mortbay.jetty", "servlet-api") exclude("io.netty", "netty") exclude("org.apache.avro", "avro-ipc") exclude("org.mortbay.jetty", "jetty"),
@@ -96,8 +131,25 @@ lazy val assembly_ = (project in file("assembly")).
   ) dependsOn root settings (
   projectDependencies := {
     Seq(
+<<<<<<< HEAD
       (projectID in root).value.excludeAll(ExclusionRule(organization = "org.apache.spark"),ExclusionRule(organization = "org.apache.hadoop"))
     )
   })
+=======
+      (projectID in root).value.excludeAll(ExclusionRule(organization = "org.apache.spark"), ExclusionRule(organization = "org.apache.hadoop"))
+    )
+  })
+
+mappings in Universal := {
+  val universalMappings = (mappings in Universal).value
+  val filtered = universalMappings filter {
+    case (f, n) => ! n.endsWith(s"${organization.value}.${name.value}-${version.value}.jar")
+  }
+  val fatJar: File = new File(s"${System.getProperty("user.dir")}/assembly/target/scala-2.10/$assemblyName-${version.value}.jar")
+  filtered :+ (fatJar -> ("lib/" + fatJar.getName))
+}
+
+scriptClasspath ++= Seq(s"$assemblyName-${version.value}.jar")
+>>>>>>> cdh5.4.0
 
 net.virtualvoid.sbt.graph.Plugin.graphSettings
