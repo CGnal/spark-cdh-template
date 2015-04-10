@@ -14,21 +14,16 @@
  * limitations under the License.
  */
 
-package com.cloudera.ps.examples.spark
+package me.davidgreco.examples.spark
 
 import com.databricks.spark.avro.AvroSaver
 import org.apache.avro.generic.GenericRecord
 import org.apache.avro.mapred.AvroInputFormat
-import org.apache.spark.{ SparkConf, SparkContext }
+import org.apache.spark.{SparkConf, SparkContext}
 
 object Main extends App {
 
   val yarn = false
-
-  def getJar(klass: Class[_]): String = {
-    val codeSource = klass.getProtectionDomain.getCodeSource
-    codeSource.getLocation.getPath
-  }
 
   val conf =
     if (yarn)

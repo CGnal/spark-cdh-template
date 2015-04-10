@@ -1,4 +1,4 @@
-package com.cloudera.ps.examples.spark
+package me.davidgreco.examples.spark
 
 import com.databricks.spark.avro.AvroSaver
 import org.apache.avro.generic.GenericRecord
