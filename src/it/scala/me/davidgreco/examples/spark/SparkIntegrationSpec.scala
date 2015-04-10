@@ -1,8 +1,5 @@
 package me.davidgreco.examples.spark
 
-//import com.databricks.spark.avro.AvroSaver
-//import org.apache.avro.generic.GenericRecord
-//import org.apache.avro.mapred.AvroInputFormat
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.SQLContext
@@ -17,7 +14,6 @@ class SparkIntegrationSpec extends WordSpec with MustMatchers with BeforeAndAfte
     val conf = new SparkConf().
       setAppName("spark-cdh5-template-yarn").
       set("executor-memory", "128m").
-      //setJars(List(getJar(AvroSaver.getClass), getJar(classOf[AvroInputFormat[GenericRecord]]))).
       setJars(List(s"${System.getProperty("user.dir")}/assembly/target/scala-2.10/spark-cdh-template-assembly-1.0.jar")).
       set("spark.yarn.jar", "hdfs:///user/spark/share/lib/spark-assembly.jar").
       setMaster("yarn-client")

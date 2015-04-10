@@ -27,7 +27,6 @@ object Main extends App {
   addPath(args(0))
 
   val jars = List(getJar(Main.getClass))
-  println(jars)
 
   val conf =
     if (yarn)
