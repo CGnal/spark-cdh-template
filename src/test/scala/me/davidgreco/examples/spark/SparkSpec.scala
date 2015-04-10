@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-<<<<<<< HEAD:src/test/scala/com/cloudera/ps/examples/spark/SparkSpec.scala
-package com.cloudera.ps.examples.spark
-=======
 package me.davidgreco.examples.spark
->>>>>>> cdh5.4.0:src/test/scala/me/davidgreco/examples/spark/SparkSpec.scala
 
 import com.databricks.spark.avro.AvroSaver
 import org.apache.avro.generic.GenericRecord
