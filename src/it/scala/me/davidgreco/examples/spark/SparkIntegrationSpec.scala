@@ -1,4 +1,4 @@
-package com.cloudera.ps.examples.spark
+package me.davidgreco.examples.spark
 
 //import com.databricks.spark.avro.AvroSaver
 //import org.apache.avro.generic.GenericRecord
@@ -12,11 +12,6 @@ import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
 class SparkIntegrationSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
 
   var sparkContext: SparkContext = _
-
-  def getJar(klass: Class[_]): String = {
-    val codeSource = klass.getProtectionDomain.getCodeSource
-    codeSource.getLocation.getPath
-  }
 
   override def beforeAll() = {
     val conf = new SparkConf().
