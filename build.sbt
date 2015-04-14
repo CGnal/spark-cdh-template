@@ -100,6 +100,7 @@ lazy val root = (project in file(".")).
 
 lazy val assembly_ = (project in file("assembly")).
   settings(
+    ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) },
     assemblyJarName in assembly := s"$assemblyName-${version.value}.jar",
     libraryDependencies ++= assemblyDependencies("compile")
   ) dependsOn root settings (
