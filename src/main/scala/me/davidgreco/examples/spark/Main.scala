@@ -16,48 +16,72 @@
 
 package me.davidgreco.examples.spark
 
-import com.databricks.spark.avro.AvroSaver
-import org.apache.avro.generic.GenericRecord
-import org.apache.avro.mapred.AvroInputFormat
+import java.io.File
+
+import org.apache.commons.io.FileUtils
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.{ Path, FileSystem }
+import org.apache.spark.streaming.kafka.KafkaUtils
+import org.apache.spark.streaming.{ Seconds, StreamingContext }
 import org.apache.spark.{ SparkConf, SparkContext }
 
 object Main extends App {
 
-  val yarn = false
+  val yarn = true
 
-  val conf =
-    if (yarn)
-      new SparkConf().
+  //addPath(args(0))
+
+  val conf = new SparkConf().setAppName("spark-cdh5-template-yarn")
+
+  val master = conf.getOption("spark.master")
+
+  val uberJarLocation = {
+    val location = getJar(Main.getClass)
+    if (new File(location).isDirectory) s"${System.getProperty("user.dir")}/assembly/target/scala-2.10/spark-cdh-template-assembly-1.0.jar" else location
+  }
+
+  if (master.isEmpty) { //it means that we are NOT using spark-submit
+    if (yarn) {
+      //If we are not using spark-submit we assume that we are running this application on a machine
+      //which is not a spark gateway, in this case we have to deploy the spark-assembly by ourselves.
+
+      //The spark assembly is on the resources, so I copy it in tmp
+      val inputUrl = getClass.getClassLoader.getResource("spark-assembly_2.10-1.3.0-cdh5.4.0.jar")
+      val dest = new File("/tmp/spark-assembly_2.10-1.3.0-cdh5.4.0.jar")
+      FileUtils.copyURLToFile(inputUrl, dest)
+      //
+      val fs = FileSystem.get(new Configuration())
+      val assembly = s"hdfs:///user/${System.getProperty("user.name")}/.sparkStaging/spark-assembly.jar"
+      if (fs.exists(new Path(assembly)))
+        fs.delete(new Path(assembly), true)
+      fs.copyFromLocalFile(
+        false,
+        true,
+        new Path("file:///tmp/spark-assembly_2.10-1.3.0-cdh5.4.0.jar"),
+        new Path(assembly)
+      )
+      conf.
         setAppName("spark-cdh5-template-yarn").
         set("executor-memory", "128m").
-        setJars(List(getJar(AvroSaver.getClass), getJar(classOf[AvroInputFormat[GenericRecord]]))).
-        set("spark.yarn.jar", "hdfs:///user/spark/share/lib/spark-assembly.jar").
+        setJars(List(uberJarLocation)).
+        set("spark.yarn.jar", assembly).
         setMaster("yarn-client")
-    else
-      new SparkConf().
+    } else
+      conf.
         setAppName("spark-cdh5-template-local").
         setMaster("local[16]")
+  }
 
   val sparkContext = new SparkContext(conf)
 
-  import org.apache.spark.sql._
+  val streamingContext = new StreamingContext(sparkContext, Seconds(1))
 
-  val sqlContext = new SQLContext(sparkContext)
+  val kafkaStream = KafkaUtils.createStream(streamingContext, "cdh-docker:2181", "id", Map("topic" -> 1))
 
-  val input = if (conf.get("spark.app.name") == "spark-cdh5-template-yarn")
-    s"hdfs:///user/${System.getProperty("user.name")}/test.avro"
-  else
-    s"file://${System.getProperty("user.dir")}/src/test/resources/test.avro"
+  kafkaStream.foreachRDD(rdd => rdd.collect().foreach(x => println(x)))
 
-  import com.databricks.spark.avro._
-
-  val data = sqlContext.avroFile(input)
-
-  data.registerTempTable("test")
-
-  val res = sqlContext.sql("select * from test where a < 10")
-
-  println(res.collect().toList)
+  streamingContext.start()
+  streamingContext.awaitTermination()
 
   sparkContext.stop()
 

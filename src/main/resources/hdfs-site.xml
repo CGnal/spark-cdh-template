@@ -8,11 +8,11 @@
   </property>
   <property>
     <name>dfs.namenode.servicerpc-address</name>
-    <value>vm-cluster-node1.vmcluster:8022</value>
+    <value>cdh-docker:8022</value>
   </property>
   <property>
     <name>dfs.https.address</name>
-    <value>vm-cluster-node1.vmcluster:50470</value>
+    <value>cdh-docker:50470</value>
   </property>
   <property>
     <name>dfs.https.port</name>
@@ -20,7 +20,7 @@
   </property>
   <property>
     <name>dfs.namenode.http-address</name>
-    <value>vm-cluster-node1.vmcluster:50070</value>
+    <value>cdh-docker:50070</value>
   </property>
   <property>
     <name>dfs.replication</name>
@@ -32,7 +32,7 @@
   </property>
   <property>
     <name>dfs.client.use.datanode.hostname</name>
-    <value>false</value>
+    <value>true</value>
   </property>
   <property>
     <name>fs.permissions.umask-mode</name>

@@ -12,27 +12,27 @@
   </property>
   <property>
     <name>yarn.resourcemanager.address</name>
-    <value>vm-cluster-node1.vmcluster:8032</value>
+    <value>cdh-docker:8032</value>
   </property>
   <property>
     <name>yarn.resourcemanager.admin.address</name>
-    <value>vm-cluster-node1.vmcluster:8033</value>
+    <value>cdh-docker:8033</value>
   </property>
   <property>
     <name>yarn.resourcemanager.scheduler.address</name>
-    <value>vm-cluster-node1.vmcluster:8030</value>
+    <value>cdh-docker:8030</value>
   </property>
   <property>
     <name>yarn.resourcemanager.resource-tracker.address</name>
-    <value>vm-cluster-node1.vmcluster:8031</value>
+    <value>cdh-docker:8031</value>
   </property>
   <property>
     <name>yarn.resourcemanager.webapp.address</name>
-    <value>vm-cluster-node1.vmcluster:8088</value>
+    <value>cdh-docker:8088</value>
   </property>
   <property>
     <name>yarn.resourcemanager.webapp.https.address</name>
-    <value>vm-cluster-node1.vmcluster:8090</value>
+    <value>cdh-docker:8090</value>
   </property>
   <property>
     <name>yarn.resourcemanager.client.thread-count</name>
@@ -56,7 +56,7 @@
   </property>
   <property>
     <name>yarn.scheduler.maximum-allocation-mb</name>
-    <value>1024</value>
+    <value>2048</value>
   </property>
   <property>
     <name>yarn.scheduler.minimum-allocation-vcores</name>
@@ -68,7 +68,7 @@
   </property>
   <property>
     <name>yarn.scheduler.maximum-allocation-vcores</name>
-    <value>1</value>
+    <value>8</value>
   </property>
   <property>
     <name>yarn.resourcemanager.amliveliness-monitor.interval-ms</name>
@@ -125,9 +125,5 @@
   <property>
     <name>yarn.resourcemanager.max-completed-applications</name>
     <value>10000</value>
-  </property>
-  <property>
-    <name>yarn.nodemanager.aux-services</name>
-    <value></value>
   </property>
 </configuration>
