@@ -4,7 +4,7 @@
 <configuration>
   <property>
     <name>fs.defaultFS</name>
-    <value>hdfs://vm-cluster-node1.vmcluster:8020</value>
+    <value>hdfs://cdh-docker:8020</value>
   </property>
   <property>
     <name>fs.trash.interval</name>
@@ -92,6 +92,14 @@
   </property>
   <property>
     <name>hadoop.proxyuser.hdfs.hosts</name>
+    <value>*</value>
+  </property>
+  <property>
+    <name>hadoop.proxyuser.yarn.hosts</name>
+    <value>*</value>
+  </property>
+  <property>
+    <name>hadoop.proxyuser.yarn.groups</name>
     <value>*</value>
   </property>
   <property>

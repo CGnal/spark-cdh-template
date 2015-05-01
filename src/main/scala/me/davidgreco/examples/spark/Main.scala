@@ -20,7 +20,7 @@ import java.io.File
 
 import org.apache.commons.io.FileUtils
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.{ Path, FileSystem }
+import org.apache.hadoop.fs.{ FileSystem, Path }
 import org.apache.spark.streaming.kafka.KafkaUtils
 import org.apache.spark.streaming.{ Seconds, StreamingContext }
 import org.apache.spark.{ SparkConf, SparkContext }
@@ -40,14 +40,15 @@ object Main extends App {
     if (new File(location).isDirectory) s"${System.getProperty("user.dir")}/assembly/target/scala-2.10/spark-cdh-template-assembly-1.0.jar" else location
   }
 
-  if (master.isEmpty) { //it means that we are NOT using spark-submit
+  if (master.isEmpty) {
+    //it means that we are NOT using spark-submit
     if (yarn) {
       //If we are not using spark-submit we assume that we are running this application on a machine
       //which is not a spark gateway, in this case we have to deploy the spark-assembly by ourselves.
 
       //The spark assembly is on the resources, so I copy it in tmp
-      val inputUrl = getClass.getClassLoader.getResource("spark-assembly_2.10-1.3.0-cdh5.4.0.jar")
-      val dest = new File("/tmp/spark-assembly_2.10-1.3.0-cdh5.4.0.jar")
+      val inputUrl = getClass.getClassLoader.getResource("spark-assembly-1.3.0-cdh5.4.0-hadoop2.6.0-cdh5.4.0.jar")
+      val dest = new File("/tmp/spark-assembly-1.3.0-cdh5.4.0-hadoop2.6.0-cdh5.4.0.jar")
       FileUtils.copyURLToFile(inputUrl, dest)
       //
       val fs = FileSystem.get(new Configuration())
@@ -57,15 +58,28 @@ object Main extends App {
       fs.copyFromLocalFile(
         false,
         true,
-        new Path("file:///tmp/spark-assembly_2.10-1.3.0-cdh5.4.0.jar"),
+        new Path("file:///tmp/spark-assembly-1.3.0-cdh5.4.0-hadoop2.6.0-cdh5.4.0.jar"),
         new Path(assembly)
       )
       conf.
+        setMaster("yarn-client").
         setAppName("spark-cdh5-template-yarn").
         set("executor-memory", "128m").
         setJars(List(uberJarLocation)).
         set("spark.yarn.jar", assembly).
-        setMaster("yarn-client")
+        setIfMissing("spark.serializer", "org.apache.spark.serializer.KryoSerializer").
+        setIfMissing("spark.io.compression.codec", "lzf").
+        setIfMissing("spark.speculation", "true").
+        setIfMissing("spark.shuffle.manager", "sort").
+        setIfMissing("spark.shuffle.service.enabled", "true").
+        setIfMissing("spark.dynamicAllocation.enabled", "true").
+        setIfMissing("spark.dynamicAllocation.minExecutors", Integer.toString(1)).
+        setIfMissing("spark.dynamicAllocation.maxExecutors", Integer.toString(4)).
+        setIfMissing("spark.dynamicAllocation.executorIdleTimeout", "60").
+        setIfMissing("spark.executor.cores", Integer.toString(1)).
+        setIfMissing("spark.executor.memory", "256m").
+        setIfMissing("spark.ui.port", Integer.toString(4040)).
+        setIfMissing("spark.ui.showConsoleProgress", "false")
     } else
       conf.
         setAppName("spark-cdh5-template-local").

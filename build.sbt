@@ -92,6 +92,11 @@ libraryDependencies ++= Seq(
   sparkExcludes("org.apache.spark" %% "spark-sql" % sparkVersion % "compile"),
   sparkExcludes("org.apache.spark" %% "spark-yarn" % sparkVersion % "compile"),
   sparkExcludes("org.apache.spark" %% "spark-streaming" % sparkVersion % "compile"),
+  hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-api" % hadoopVersion % (if (isALibrary) "provided" else "compile")),
+  hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-client" % hadoopVersion % (if (isALibrary) "provided" else "compile")),
+  hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-common" % hadoopVersion % (if (isALibrary) "provided" else "compile")),
+  hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-applications-distributedshell" % hadoopVersion % (if (isALibrary) "provided" else "compile")),
+  hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-server-web-proxy" % hadoopVersion % (if (isALibrary) "provided" else "compile")),
   hadoopClientExcludes("org.apache.hadoop" % "hadoop-client" % hadoopVersion % (if (isALibrary) "provided" else "compile"))
 ) ++ assemblyDependencies(scope)
 
@@ -119,6 +124,10 @@ lazy val assembly_ = (project in file("assembly")).
   settings(
     ivyScala := ivyScala.value map {
       _.copy(overrideScalaVersion = true)
+    },
+    assemblyExcludedJars in assembly := {
+      val cp = (fullClasspath in assembly).value
+      cp filter {_.data.getName == "spark-assembly-1.3.0-cdh5.4.0-hadoop2.6.0-cdh5.4.0.jar"}
     },
     assemblyMergeStrategy in assembly := {
       case "org/apache/spark/unused/UnusedStubClass.class" => MergeStrategy.last
