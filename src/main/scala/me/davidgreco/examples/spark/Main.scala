@@ -45,7 +45,7 @@ object Main extends App {
       //which is not a spark gateway, in this case we have to deploy the spark-assembly by ourselves.
 
       //The spark assembly is on the resources, so I copy it in tmp
-      val inputUrl = getClass.getClassLoader.getResource("spark-assembly-1.3.0-cdh5.4.0-hadoop2.6.0-cdh5.4.0.jar")
+      val inputUrl = getClass.getClassLoader.getResource("spark-assembly_2.10-1.3.0-cdh5.4.5.jar")
       val dest = new File("/tmp/spark-assembly-1.3.0-cdh5.4.0-hadoop2.6.0-cdh5.4.0.jar")
       FileUtils.copyURLToFile(inputUrl, dest)
       //
