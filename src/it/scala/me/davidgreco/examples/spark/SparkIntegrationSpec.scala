@@ -22,7 +22,7 @@ class SparkIntegrationSpec extends WordSpec with MustMatchers with BeforeAndAfte
   }
 
   override def beforeAll() = {
-    val inputUrl = getClass.getClassLoader.getResource("spark-assembly-1.3.0-cdh5.4.0-hadoop2.6.0-cdh5.4.0.jar")
+    val inputUrl = getClass.getClassLoader.getResource("spark-assembly_2.10-1.3.0-cdh5.4.5.jar")
     val dest = new File("/tmp/spark-assembly-1.3.0-cdh5.4.0-hadoop2.6.0-cdh5.4.0.jar")
     FileUtils.copyURLToFile(inputUrl, dest)
     //
