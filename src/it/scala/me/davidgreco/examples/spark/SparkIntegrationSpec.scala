@@ -1,8 +1,11 @@
 package me.davidgreco.examples.spark
 
+import java.io.File
+
 import com.databricks.spark.avro.AvroSaver
 import org.apache.avro.generic.GenericRecord
 import org.apache.avro.mapred.AvroInputFormat
+import org.apache.commons.io.FileUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.SQLContext
@@ -19,11 +22,26 @@ class SparkIntegrationSpec extends WordSpec with MustMatchers with BeforeAndAfte
   }
 
   override def beforeAll() = {
+    val inputUrl = getClass.getClassLoader.getResource("spark-assembly-1.3.0-cdh5.4.0-hadoop2.6.0-cdh5.4.0.jar")
+    val dest = new File("/tmp/spark-assembly-1.3.0-cdh5.4.0-hadoop2.6.0-cdh5.4.0.jar")
+    FileUtils.copyURLToFile(inputUrl, dest)
+    //
+    val fs = FileSystem.get(new Configuration())
+    val assembly = s"hdfs:///user/${System.getProperty("user.name")}/.sparkStaging/spark-assembly.jar"
+    if (fs.exists(new Path(assembly)))
+      fs.delete(new Path(assembly), true)
+    fs.copyFromLocalFile(
+      false,
+      true,
+      new Path("file:///tmp/spark-assembly-1.3.0-cdh5.4.0-hadoop2.6.0-cdh5.4.0.jar"),
+      new Path(assembly)
+    )
+
     val conf = new SparkConf().
       setAppName("spark-cdh5-template-yarn").
       set("executor-memory", "128m").
       setJars(List(getJar(AvroSaver.getClass), getJar(classOf[AvroInputFormat[GenericRecord]]))).
-      set("spark.yarn.jar", "hdfs:///user/spark/share/lib/spark-assembly.jar").
+      set("spark.yarn.jar", s"hdfs:///user/${System.getProperty("user.name")}/.sparkStaging/spark-assembly.jar").
       setMaster("yarn-client")
     sparkContext = new SparkContext(conf)
   }

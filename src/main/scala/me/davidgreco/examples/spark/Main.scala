@@ -21,8 +21,6 @@ import java.io.File
 import org.apache.commons.io.FileUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{ FileSystem, Path }
-import org.apache.spark.streaming.kafka.KafkaUtils
-import org.apache.spark.streaming.{ Seconds, StreamingContext }
 import org.apache.spark.{ SparkConf, SparkContext }
 
 object Main extends App {
@@ -88,14 +86,8 @@ object Main extends App {
 
   val sparkContext = new SparkContext(conf)
 
-  val streamingContext = new StreamingContext(sparkContext, Seconds(1))
-
-  val kafkaStream = KafkaUtils.createStream(streamingContext, "cdh-docker:2181", "id", Map("topic" -> 1))
-
-  kafkaStream.foreachRDD(rdd => rdd.collect().foreach(x => println(x)))
-
-  streamingContext.start()
-  streamingContext.awaitTermination()
+  val rdd = sparkContext.parallelize[Int](1 to 10000)
+  println(rdd.count())
 
   sparkContext.stop()
 
