@@ -56,15 +56,13 @@ val sparkAvroVersion = "1.0.0"
 
 val avroVersion = "1.7.6-cdh5.4.5"
 
-val scalaTestVersion = "2.2.4"
+val scalaTestVersion = "2.2.5"
 
 resolvers in ThisBuild ++= Seq(
   "cloudera" at "https://repository.cloudera.com/artifactory/cloudera-repos/"
 )
 
 val isALibrary = false //this is a library project
-lazy val scope = if (isALibrary) "compile" else "provided" /*if it's a library the scope is "compile" since we want the transitive dependencies on the library
-                                                             otherwise we set up the scope to "provided" because those dependencies will be assembled in the "assembly"*/
 
 val sparkExcludes =
   (moduleId: ModuleID) => moduleId.
@@ -87,18 +85,23 @@ val hadoopClientExcludes =
     exclude("org.slf4j", "slf4j-api").
     exclude("javax.servlet", "servlet-api")
 
+lazy val assemblyDependenciesScope = if (isALibrary) "compile" else "provided" /*if it's a library the scope is "compile" since we want the transitive dependencies on the library
+                                                                                 otherwise we set up the scope to "provided" because those dependencies will be assembled in the "assembly"*/
+
+lazy val hadoopDependenciesScope = if (isALibrary) "provided" else "compile"
+
 libraryDependencies ++= Seq(
   sparkExcludes("org.apache.spark" %% "spark-core" % sparkVersion % "compile"),
   sparkExcludes("org.apache.spark" %% "spark-sql" % sparkVersion % "compile"),
   sparkExcludes("org.apache.spark" %% "spark-yarn" % sparkVersion % "compile"),
   sparkExcludes("org.apache.spark" %% "spark-streaming" % sparkVersion % "compile"),
-  hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-api" % hadoopVersion % (if (isALibrary) "provided" else "compile")),
-  hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-client" % hadoopVersion % (if (isALibrary) "provided" else "compile")),
-  hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-common" % hadoopVersion % (if (isALibrary) "provided" else "compile")),
-  hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-applications-distributedshell" % hadoopVersion % (if (isALibrary) "provided" else "compile")),
-  hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-server-web-proxy" % hadoopVersion % (if (isALibrary) "provided" else "compile")),
-  hadoopClientExcludes("org.apache.hadoop" % "hadoop-client" % hadoopVersion % (if (isALibrary) "provided" else "compile"))
-) ++ assemblyDependencies(scope)
+  hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-api" % hadoopVersion % hadoopDependenciesScope),
+  hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-client" % hadoopVersion % hadoopDependenciesScope),
+  hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-common" % hadoopVersion % hadoopDependenciesScope),
+  hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-applications-distributedshell" % hadoopVersion % hadoopDependenciesScope),
+  hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-server-web-proxy" % hadoopVersion % hadoopDependenciesScope),
+  hadoopClientExcludes("org.apache.hadoop" % "hadoop-client" % hadoopVersion % hadoopDependenciesScope)
+) ++ assemblyDependencies(assemblyDependenciesScope)
 
 //http://stackoverflow.com/questions/18838944/how-to-add-provided-dependencies-back-to-run-test-tasks-classpath/21803413#21803413
 run in Compile <<= Defaults.runTask(fullClasspath in Compile, mainClass in(Compile, run), runner in(Compile, run))
@@ -125,10 +128,10 @@ lazy val assembly_ = (project in file("assembly")).
     ivyScala := ivyScala.value map {
       _.copy(overrideScalaVersion = true)
     },
-    assemblyExcludedJars in assembly := {
-      val cp = (fullClasspath in assembly).value
-      cp filter {_.data.getName == "spark-assembly-1.3.0-cdh5.4.0-hadoop2.6.0-cdh5.4.0.jar"}
-    },
+    //assemblyExcludedJars in assembly := {
+    //  val cp = (fullClasspath in assembly).value
+    //  cp filter {_.data.getName == "spark-assembly-1.3.0-cdh5.4.0-hadoop2.6.0-cdh5.4.0.jar"}
+    //},
     assemblyMergeStrategy in assembly := {
       case "org/apache/spark/unused/UnusedStubClass.class" => MergeStrategy.last
       case x =>
