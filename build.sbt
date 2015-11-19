@@ -48,9 +48,9 @@ wartremoverErrors ++= Seq(
   Wart.Nothing
 )
 
-val sparkVersion = "1.3.0-cdh5.4.5"
+val sparkVersion = "1.5.0-cdh5.5.0"
 
-val hadoopVersion = "2.6.0-cdh5.4.5"
+val hadoopVersion = "2.6.0-cdh5.5.0"
 
 val sparkAvroVersion = "1.0.0"
 
@@ -74,19 +74,22 @@ val sparkExcludes =
     exclude("org.apache.hadoop", "hadoop-yarn-server-web-proxy")
 
 val assemblyDependencies = (scope: String) => Seq(
-    "com.databricks" %% "spark-avro" % sparkAvroVersion % scope exclude("org.apache.avro", "avro") exclude("org.apache.avro", "avro-mapred"),
-    "org.apache.avro" % "avro" % avroVersion % scope exclude("org.mortbay.jetty", "servlet-api") exclude("io.netty", "netty") exclude("org.apache.avro", "avro-ipc") exclude("org.mortbay.jetty", "jetty"),
-    "org.apache.avro" % "avro-mapred" % avroVersion % scope exclude("org.mortbay.jetty", "servlet-api") exclude("io.netty", "netty") exclude("org.apache.avro", "avro-ipc") exclude("org.mortbay.jetty", "jetty"),
-    sparkExcludes("org.apache.spark" %% "spark-streaming-kafka" % sparkVersion % scope)
-  )
+  "com.databricks" %% "spark-avro" % sparkAvroVersion % scope exclude("org.apache.avro", "avro") exclude("org.apache.avro", "avro-mapred"),
+  "org.apache.avro" % "avro" % avroVersion % scope exclude("org.mortbay.jetty", "servlet-api") exclude("io.netty", "netty")
+    exclude("org.apache.avro", "avro-ipc") exclude("org.mortbay.jetty", "jetty"),
+  "org.apache.avro" % "avro-mapred" % avroVersion % scope exclude("org.mortbay.jetty", "servlet-api") exclude("io.netty", "netty")
+    exclude("org.apache.avro", "avro-ipc") exclude("org.mortbay.jetty", "jetty"),
+  sparkExcludes("org.apache.spark" %% "spark-streaming-kafka" % sparkVersion % scope)
+)
 
 val hadoopClientExcludes =
   (moduleId: ModuleID) => moduleId.
     exclude("org.slf4j", "slf4j-api").
     exclude("javax.servlet", "servlet-api")
 
-lazy val assemblyDependenciesScope = if (isALibrary) "compile" else "provided" /*if it's a library the scope is "compile" since we want the transitive dependencies on the library
-                                                                                 otherwise we set up the scope to "provided" because those dependencies will be assembled in the "assembly"*/
+/*if it's a library the scope is "compile" since we want the transitive dependencies on the library
+  otherwise we set up the scope to "provided" because those dependencies will be assembled in the "assembly"*/
+lazy val assemblyDependenciesScope: String = if (isALibrary) "compile" else "provided"
 
 lazy val hadoopDependenciesScope = if (isALibrary) "provided" else "compile"
 
@@ -94,6 +97,7 @@ libraryDependencies ++= Seq(
   sparkExcludes("org.apache.spark" %% "spark-core" % sparkVersion % "compile"),
   sparkExcludes("org.apache.spark" %% "spark-sql" % sparkVersion % "compile"),
   sparkExcludes("org.apache.spark" %% "spark-yarn" % sparkVersion % "compile"),
+  sparkExcludes("org.apache.spark" %% "spark-mllib" % sparkVersion % "compile"),
   sparkExcludes("org.apache.spark" %% "spark-streaming" % sparkVersion % "compile"),
   hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-api" % hadoopVersion % hadoopDependenciesScope),
   hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-client" % hadoopVersion % hadoopDependenciesScope),
@@ -143,7 +147,8 @@ lazy val assembly_ = (project in file("assembly")).
   ) dependsOn root settings (
   projectDependencies := {
     Seq(
-      (projectID in root).value.excludeAll(ExclusionRule(organization = "org.apache.spark"), if (!isALibrary) ExclusionRule(organization = "org.apache.hadoop") else ExclusionRule())
+      (projectID in root).value.excludeAll(ExclusionRule(organization = "org.apache.spark"),
+        if (!isALibrary) ExclusionRule(organization = "org.apache.hadoop") else ExclusionRule())
     )
   })
 

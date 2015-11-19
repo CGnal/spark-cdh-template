@@ -21,7 +21,7 @@ class SparkIntegrationSpec extends WordSpec with MustMatchers with BeforeAndAfte
     codeSource.getLocation.getPath
   }
 
-  override def beforeAll() = {
+  override def beforeAll(): Unit = {
     val inputUrl = getClass.getClassLoader.getResource("spark-assembly_2.10-1.3.0-cdh5.4.5.jar")
     val dest = new File("/tmp/spark-assembly_2.10-1.3.0-cdh5.4.5.jar")
     FileUtils.copyURLToFile(inputUrl, dest)
@@ -69,11 +69,12 @@ class SparkIntegrationSpec extends WordSpec with MustMatchers with BeforeAndAfte
 
       val res = sqlContext.sql("select * from test where a < 10")
 
-      res.collect().toList.toString must be("List([0,CIAO0], [1,CIAO1], [2,CIAO2], [3,CIAO3], [4,CIAO4], [5,CIAO5], [6,CIAO6], [7,CIAO7], [8,CIAO8], [9,CIAO9])")
+      res.collect().toList.toString must
+        be("List([0,CIAO0], [1,CIAO1], [2,CIAO2], [3,CIAO3], [4,CIAO4], [5,CIAO5], [6,CIAO6], [7,CIAO7], [8,CIAO8], [9,CIAO9])")
     }
   }
 
-  override def afterAll() = {
+  override def afterAll(): Unit = {
     sparkContext.stop()
   }
 

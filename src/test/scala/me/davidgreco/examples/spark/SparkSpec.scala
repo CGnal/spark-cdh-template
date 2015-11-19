@@ -32,7 +32,7 @@ class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
 
   var sparkContext: SparkContext = _
 
-  override def beforeAll() = {
+  override def beforeAll(): Unit = {
     val conf = new SparkConf().
       setAppName("spark-cdh5-template-local-test").
       setMaster("local[16]")
@@ -55,7 +55,8 @@ class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
 
       val res = sqlContext.sql("select * from test where a < 10")
 
-      res.collect().toList.toString must be("List([0,CIAO0], [1,CIAO1], [2,CIAO2], [3,CIAO3], [4,CIAO4], [5,CIAO5], [6,CIAO6], [7,CIAO7], [8,CIAO8], [9,CIAO9])")
+      res.collect().toList.toString must
+        be("List([0,CIAO0], [1,CIAO1], [2,CIAO2], [3,CIAO3], [4,CIAO4], [5,CIAO5], [6,CIAO6], [7,CIAO7], [8,CIAO8], [9,CIAO9])")
     }
   }
 
@@ -93,7 +94,7 @@ class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
       if (fileSystem.exists(dir))
         fileSystem.delete(dir, true)
 
-      val peopleList = List(Person("David", 50), Person("Ruben", 14), Person("Giuditta", 12), Person("Vita", 19))
+      val peopleList: List[Person] = List(Person("David", 50), Person("Ruben", 14), Person("Giuditta", 12), Person("Vita", 19))
       val people = sparkContext.parallelize[Person](peopleList).toDF()
       people.registerTempTable("people")
 
@@ -108,7 +109,7 @@ class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
     }
   }
 
-  override def afterAll() = {
+  override def afterAll(): Unit = {
     sparkContext.stop()
   }
 
