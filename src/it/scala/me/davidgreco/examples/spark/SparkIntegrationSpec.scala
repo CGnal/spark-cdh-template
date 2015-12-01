@@ -17,7 +17,11 @@ class SparkIntegrationSpec extends WordSpec with MustMatchers with BeforeAndAfte
 
   override def beforeAll(): Unit = {
 
-    addPath("/Users/dgreco/Workspace/cdh/hadoop/etc/hadoop")
+    val hadoop_conf_dir = System.getenv("HADOOP_CONF_DIR")
+
+    assert(hadoop_conf_dir != null, "please set the HADOOP_CONF_DIR env variable")
+
+    addPath(hadoop_conf_dir)
 
     val uberJarLocation = s"${System.getProperty("user.dir")}/assembly/target/scala-2.10/spark-cdh-template-assembly-1.0.jar"
 
@@ -43,6 +47,7 @@ class SparkIntegrationSpec extends WordSpec with MustMatchers with BeforeAndAfte
 
   "Spark" must {
     "load an avro file as a schema rdd correctly" in {
+
       val fs = FileSystem.get(new Configuration())
       val input = s"/user/${System.getProperty("user.name")}/test.avro"
       if (fs.exists(new Path(input)))
