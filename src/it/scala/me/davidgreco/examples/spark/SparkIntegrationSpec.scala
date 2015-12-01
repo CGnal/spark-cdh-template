@@ -1,11 +1,5 @@
 package me.davidgreco.examples.spark
 
-import java.io.File
-
-import com.databricks.spark.avro.AvroSaver
-import org.apache.avro.generic.GenericRecord
-import org.apache.avro.mapred.AvroInputFormat
-import org.apache.commons.io.FileUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.SQLContext
@@ -22,27 +16,28 @@ class SparkIntegrationSpec extends WordSpec with MustMatchers with BeforeAndAfte
   }
 
   override def beforeAll(): Unit = {
-    val inputUrl = getClass.getClassLoader.getResource("spark-assembly_2.10-1.3.0-cdh5.4.5.jar")
-    val dest = new File("/tmp/spark-assembly_2.10-1.3.0-cdh5.4.5.jar")
-    FileUtils.copyURLToFile(inputUrl, dest)
-    //
-    val fs = FileSystem.get(new Configuration())
-    val assembly = s"hdfs:///user/${System.getProperty("user.name")}/.sparkStaging/spark-assembly.jar"
-    if (fs.exists(new Path(assembly)))
-      fs.delete(new Path(assembly), true)
-    fs.copyFromLocalFile(
-      false,
-      true,
-      new Path("file:///tmp/spark-assembly_2.10-1.3.0-cdh5.4.5.jar"),
-      new Path(assembly)
-    )
+
+    addPath("/Users/dgreco/Workspace/cdh/hadoop/etc/hadoop")
+
+    val uberJarLocation = s"${System.getProperty("user.dir")}/assembly/target/scala-2.10/spark-cdh-template-assembly-1.0.jar"
 
     val conf = new SparkConf().
+      setMaster("yarn-client").
       setAppName("spark-cdh5-template-yarn").
-      set("executor-memory", "128m").
-      setJars(List(getJar(AvroSaver.getClass), getJar(classOf[AvroInputFormat[GenericRecord]]))).
-      set("spark.yarn.jar", s"hdfs:///user/${System.getProperty("user.name")}/.sparkStaging/spark-assembly.jar").
-      setMaster("yarn-client")
+      setJars(List(uberJarLocation)).
+      set("spark.yarn.jar", "local:/opt/cloudera/parcels/CDH/lib/spark/assembly/lib/spark-assembly.jar").
+      set("spark.executor.extraClassPath", "/opt/cloudera/parcels/CDH/jars/*").
+      set("spark.serializer", "org.apache.spark.serializer.KryoSerializer").
+      set("spark.io.compression.codec", "lzf").
+      set("spark.speculation", "true").
+      set("spark.shuffle.manager", "sort").
+      set("spark.shuffle.service.enabled", "true").
+      set("spark.dynamicAllocation.enabled", "true").
+      set("spark.dynamicAllocation.initialExecutors", Integer.toString(4)).
+      set("spark.dynamicAllocation.minExecutors", Integer.toString(4)).
+      set("spark.executor.cores", Integer.toString(1)).
+      set("spark.executor.memory", "256m")
+
     sparkContext = new SparkContext(conf)
   }
 
@@ -59,11 +54,11 @@ class SparkIntegrationSpec extends WordSpec with MustMatchers with BeforeAndAfte
         new Path(s"/user/${System.getProperty("user.name")}")
       )
 
-      val sqlContext = new SQLContext(sparkContext)
-
       import com.databricks.spark.avro._
 
-      val data = sqlContext.avroFile(input)
+      val sqlContext = new SQLContext(sparkContext)
+
+      val data = sqlContext.read.avro(input)
 
       data.registerTempTable("test")
 

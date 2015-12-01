@@ -52,9 +52,7 @@ val sparkVersion = "1.5.0-cdh5.5.0"
 
 val hadoopVersion = "2.6.0-cdh5.5.0"
 
-val sparkAvroVersion = "1.0.0"
-
-val avroVersion = "1.7.6-cdh5.4.5"
+val sparkAvroVersion = "1.1.0-cdh5.5.0"
 
 val scalaTestVersion = "2.2.5"
 
@@ -74,11 +72,6 @@ val sparkExcludes =
     exclude("org.apache.hadoop", "hadoop-yarn-server-web-proxy")
 
 val assemblyDependencies = (scope: String) => Seq(
-  "com.databricks" %% "spark-avro" % sparkAvroVersion % scope exclude("org.apache.avro", "avro") exclude("org.apache.avro", "avro-mapred"),
-  "org.apache.avro" % "avro" % avroVersion % scope exclude("org.mortbay.jetty", "servlet-api") exclude("io.netty", "netty")
-    exclude("org.apache.avro", "avro-ipc") exclude("org.mortbay.jetty", "jetty"),
-  "org.apache.avro" % "avro-mapred" % avroVersion % scope exclude("org.mortbay.jetty", "servlet-api") exclude("io.netty", "netty")
-    exclude("org.apache.avro", "avro-ipc") exclude("org.mortbay.jetty", "jetty"),
   sparkExcludes("org.apache.spark" %% "spark-streaming-kafka" % sparkVersion % scope)
 )
 
@@ -94,6 +87,7 @@ lazy val assemblyDependenciesScope: String = if (isALibrary) "compile" else "pro
 lazy val hadoopDependenciesScope = if (isALibrary) "provided" else "compile"
 
 libraryDependencies ++= Seq(
+  sparkExcludes("com.databricks" %% "spark-avro" % sparkAvroVersion % "compile"),
   sparkExcludes("org.apache.spark" %% "spark-core" % sparkVersion % "compile"),
   sparkExcludes("org.apache.spark" %% "spark-sql" % sparkVersion % "compile"),
   sparkExcludes("org.apache.spark" %% "spark-yarn" % sparkVersion % "compile"),

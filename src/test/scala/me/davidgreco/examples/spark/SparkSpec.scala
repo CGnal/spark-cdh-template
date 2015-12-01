@@ -16,7 +16,6 @@
 
 package me.davidgreco.examples.spark
 
-import com.databricks.spark.avro.AvroSaver
 import org.apache.avro.generic.GenericRecord
 import org.apache.avro.mapred.{ AvroInputFormat, AvroWrapper }
 import org.apache.hadoop.conf.Configuration
@@ -49,7 +48,7 @@ class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
 
       import com.databricks.spark.avro._
 
-      val data = sqlContext.avroFile(input)
+      val data = sqlContext.read.avro(input)
 
       data.registerTempTable("test")
 
@@ -99,11 +98,11 @@ class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
       people.registerTempTable("people")
 
       val teenagers = sqlContext.sql("SELECT * FROM people WHERE age >= 13 AND age <= 19")
-      AvroSaver.save(teenagers, output)
-
+      import com.databricks.spark.avro._
+      teenagers.write.avro(output)
       //Now I reload the file to check if everything is fine
       import com.databricks.spark.avro._
-      val data = sqlContext.avroFile(output)
+      val data = sqlContext.read.avro(output)
       data.registerTempTable("teenagers")
       sqlContext.sql("select * from teenagers").collect().toList.toString must be("List([Ruben,14], [Vita,19])")
     }
