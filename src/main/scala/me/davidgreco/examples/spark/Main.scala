@@ -18,11 +18,7 @@ package me.davidgreco.examples.spark
 
 import java.io.File
 
-import org.apache.commons.io.FileUtils
-import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.{ FileSystem, Path }
-import org.apache.spark.sql.SQLContext
-import org.apache.spark.{ SparkConf, SparkContext }
+import org.apache.spark.{SparkConf, SparkContext}
 
 object Main extends App {
 
@@ -42,7 +38,7 @@ object Main extends App {
 
     addPath(args(0))
 
-    if (yarn) {
+    if (yarn)
       conf.
         setMaster("yarn-client").
         setAppName("spark-cdh5-template-yarn").
@@ -59,7 +55,7 @@ object Main extends App {
         set("spark.dynamicAllocation.minExecutors", Integer.toString(4)).
         set("spark.executor.cores", Integer.toString(1)).
         set("spark.executor.memory", "256m")
-    } else
+    else
       conf.
         setAppName("spark-cdh5-template-local").
         setMaster("local[16]")
