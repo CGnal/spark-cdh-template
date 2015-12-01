@@ -157,5 +157,3 @@ mappings in Universal := {
 }
 
 scriptClasspath ++= Seq(s"$assemblyName-${version.value}.jar")
-
-net.virtualvoid.sbt.graph.Plugin.graphSettings
