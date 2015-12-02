@@ -24,6 +24,10 @@ object Main extends App {
 
   val yarn = true
 
+  val initialExecutors = 4
+
+  val minExecutors = 4
+
   val conf = new SparkConf().setAppName("spark-cdh5-template-yarn")
 
   val master = conf.getOption("spark.master")
@@ -51,8 +55,8 @@ object Main extends App {
         set("spark.shuffle.manager", "sort").
         set("spark.shuffle.service.enabled", "true").
         set("spark.dynamicAllocation.enabled", "true").
-        set("spark.dynamicAllocation.initialExecutors", Integer.toString(4)).
-        set("spark.dynamicAllocation.minExecutors", Integer.toString(4)).
+        set("spark.dynamicAllocation.initialExecutors", Integer.toString(initialExecutors)).
+        set("spark.dynamicAllocation.minExecutors", Integer.toString(minExecutors)).
         set("spark.executor.cores", Integer.toString(1)).
         set("spark.executor.memory", "256m")
     else
