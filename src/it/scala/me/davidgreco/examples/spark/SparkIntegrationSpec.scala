@@ -23,9 +23,7 @@ class SparkIntegrationSpec extends WordSpec with MustMatchers with BeforeAndAfte
 
     val hadoop_conf_dir = Option(System.getenv("HADOOP_CONF_DIR"))
 
-    assert(hadoop_conf_dir.isDefined, "please set the HADOOP_CONF_DIR env variable")
-
-    addPath(hadoop_conf_dir.get)
+    hadoop_conf_dir.fold(assert(false, "please set the HADOOP_CONF_DIR env variable"))(addPath(_))
 
     val uberJarLocation = s"${System.getProperty("user.dir")}/assembly/target/scala-2.10/spark-cdh-template-assembly-1.0.jar"
 
