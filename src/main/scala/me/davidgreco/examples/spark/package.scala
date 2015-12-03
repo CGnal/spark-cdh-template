@@ -25,6 +25,7 @@ package object spark {
     val method = classOf[URLClassLoader].getDeclaredMethod("addURL", classOf[URL])
     method.setAccessible(true)
     method.invoke(ClassLoader.getSystemClassLoader, new File(dir).toURI.toURL)
+    ()
   }
 
   //given a class it returns the jar (in the classpath) containing that class
