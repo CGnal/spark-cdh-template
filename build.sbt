@@ -48,11 +48,11 @@ wartremoverErrors ++= Seq(
   Wart.Nothing
 )
 
-val sparkVersion = "1.5.0-cdh5.5.0"
+val sparkVersion = "1.5.0-cdh5.5.1"
 
-val hadoopVersion = "2.6.0-cdh5.5.0"
+val hadoopVersion = "2.6.0-cdh5.5.1"
 
-val sparkAvroVersion = "1.1.0-cdh5.5.0"
+val sparkAvroVersion = "1.1.0-cdh5.5.1"
 
 val scalaTestVersion = "2.2.5"
 
