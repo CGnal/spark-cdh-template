@@ -6,7 +6,7 @@ organization := "me.davidgreco"
 
 name := "spark-cdh5-template"
 
-version in ThisBuild := "1.0"
+version := "1.0"
 
 val assemblyName = "spark-cdh-template-assembly"
 
@@ -56,7 +56,7 @@ val sparkAvroVersion = "1.1.0-cdh5.5.1"
 
 val scalaTestVersion = "2.2.5"
 
-resolvers in ThisBuild ++= Seq(
+resolvers ++= Seq(
   "cloudera" at "https://repository.cloudera.com/artifactory/cloudera-repos/"
 )
 
@@ -121,15 +121,11 @@ lazy val root = (project in file(".")).
     libraryDependencies += "org.scalatest" % "scalatest_2.10" % scalaTestVersion % "it,test"
   ).enablePlugins(AutomateHeaderPlugin).disablePlugins(AssemblyPlugin)
 
-lazy val assembly_ = (project in file("assembly")).
+lazy val projectAssembly = (project in file("assembly")).
   settings(
     ivyScala := ivyScala.value map {
       _.copy(overrideScalaVersion = true)
     },
-    //assemblyExcludedJars in assembly := {
-    //  val cp = (fullClasspath in assembly).value
-    //  cp filter {_.data.getName == "spark-assembly-1.3.0-cdh5.4.0-hadoop2.6.0-cdh5.4.0.jar"}
-    //},
     assemblyMergeStrategy in assembly := {
       case "org/apache/spark/unused/UnusedStubClass.class" => MergeStrategy.last
       case x =>
