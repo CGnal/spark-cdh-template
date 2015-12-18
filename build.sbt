@@ -6,11 +6,11 @@ organization := "me.davidgreco"
 
 name := "spark-cdh5-template"
 
-version := "1.0"
+version in ThisBuild := "1.0"
 
 val assemblyName = "spark-cdh-template-assembly"
 
-enablePlugins(JavaAppPackaging)
+//enablePlugins(JavaAppPackaging)
 
 scalaVersion := "2.10.5"
 
@@ -119,7 +119,10 @@ lazy val root = (project in file(".")).
   settings(Defaults.itSettings: _*).
   settings(
     libraryDependencies += "org.scalatest" % "scalatest_2.10" % scalaTestVersion % "it,test"
-  ).enablePlugins(AutomateHeaderPlugin).disablePlugins(AssemblyPlugin)
+  ).
+  enablePlugins(AutomateHeaderPlugin).
+  enablePlugins(JavaAppPackaging).
+  disablePlugins(AssemblyPlugin)
 
 lazy val projectAssembly = (project in file("assembly")).
   settings(
