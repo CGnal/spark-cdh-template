@@ -10,8 +10,6 @@ version in ThisBuild := "1.0"
 
 val assemblyName = "spark-cdh-template-assembly"
 
-//enablePlugins(JavaAppPackaging)
-
 scalaVersion := "2.10.5"
 
 ivyScala := ivyScala.value map {
