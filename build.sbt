@@ -46,13 +46,13 @@ wartremoverErrors ++= Seq(
   Wart.Nothing
 )
 
-val sparkVersion = "1.5.0-cdh5.5.1"
+val sparkVersion = "1.5.0-cdh5.5.2"
 
-val hadoopVersion = "2.6.0-cdh5.5.1"
+val hadoopVersion = "2.6.0-cdh5.5.2"
 
-val sparkAvroVersion = "1.1.0-cdh5.5.1"
+val sparkAvroVersion = "1.1.0-cdh5.5.2"
 
-val scalaTestVersion = "2.2.5"
+val scalaTestVersion = "2.2.6"
 
 resolvers ++= Seq(
   "cloudera" at "https://repository.cloudera.com/artifactory/cloudera-repos/"

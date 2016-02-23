@@ -17,7 +17,7 @@
 package me.davidgreco.examples
 
 import java.io.File
-import java.net.{ URL, URLClassLoader }
+import java.net.{URL, URLClassLoader}
 
 package object spark {
   //Simple function for adding a directory to the system classpath
