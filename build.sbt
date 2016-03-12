@@ -1,6 +1,6 @@
 import de.heikoseeberger.sbtheader.HeaderPattern
 import de.heikoseeberger.sbtheader.license.Apache2_0
-import sbt._
+import sbt.{ExclusionRule, _}
 
 organization := "me.davidgreco"
 
@@ -50,12 +50,15 @@ val sparkVersion = "1.5.0-cdh5.5.2"
 
 val hadoopVersion = "2.6.0-cdh5.5.2"
 
+val hbaseVersion = "1.0.0-cdh5.5.2"
+
 val sparkAvroVersion = "1.1.0-cdh5.5.2"
 
 val scalaTestVersion = "2.2.6"
 
 resolvers ++= Seq(
-  "cloudera" at "https://repository.cloudera.com/artifactory/cloudera-repos/"
+  "cloudera" at "https://repository.cloudera.com/artifactory/cloudera-repos/",
+  "apache snapshots" at "https://repository.apache.org/content/repositories/snapshots/"
 )
 
 val isALibrary = false //this is a library project
@@ -67,10 +70,51 @@ val sparkExcludes =
     exclude("org.apache.hadoop", "hadoop-yarn-api").
     exclude("org.apache.hadoop", "hadoop-yarn-common").
     exclude("org.apache.hadoop", "hadoop-yarn-server-common").
-    exclude("org.apache.hadoop", "hadoop-yarn-server-web-proxy")
+    exclude("org.apache.hadoop", "hadoop-yarn-server-web-proxy").
+    exclude("org.apache.zookeeper", "zookeeper")
+
+val hbaseExcludes =
+  (moduleID: ModuleID) => moduleID.
+    exclude("org.slf4j", "slf4j-log4j12").
+    exclude("log4j", "log4j").
+    exclude("org.apache.thrift", "thrift").
+    exclude("org.jruby", "jruby-complete").
+    exclude("org.slf4j", "slf4j-log4j12").
+    exclude("org.mortbay.jetty", "jsp-2.1").
+    exclude("org.mortbay.jetty", "jsp-api-2.1").
+    exclude("org.mortbay.jetty", "servlet-api-2.5").
+    exclude("com.sun.jersey", "jersey-core").
+    exclude("com.sun.jersey", "jersey-json").
+    exclude("com.sun.jersey", "jersey-server").
+    exclude("org.mortbay.jetty", "jetty").
+    exclude("org.mortbay.jetty", "jetty-util").
+    exclude("tomcat", "jasper-runtime").
+    exclude("tomcat", "jasper-compiler").
+    exclude("org.jboss.netty", "netty").
+    exclude("io.netty", "netty").
+    exclude("com.google.guava", "guava").
+    exclude("io.netty", "netty")
+
+val hbaseSparkExcludes =
+  (moduleID: ModuleID) => moduleID.
+    exclude("org.apache.hbase", "hbase-hadoop-compat").
+    exclude("org.apache.hbase", "hbase-protocol").
+    exclude("org.apache.hbase", "hbase-server").
+    exclude("org.apache.hbase", "hbase-client").
+    exclude("org.apache.hbase", "hbase-common").
+    exclude("org.apache.zookeeper", "zookeeper").
+    exclude("org.apache.spark", "spark-core")
 
 val assemblyDependencies = (scope: String) => Seq(
-  sparkExcludes("org.apache.spark" %% "spark-streaming-kafka" % sparkVersion % scope)
+  sparkExcludes("org.apache.spark" %% "spark-streaming-kafka" % sparkVersion % scope),
+  hbaseExcludes("org.apache.hbase" % "hbase-hadoop-compat" % hbaseVersion % scope),
+  hbaseExcludes("org.apache.hbase" % "hbase-protocol" % hbaseVersion % scope),
+  hbaseExcludes("org.apache.hbase" % "hbase-server" % hbaseVersion % scope),
+  hbaseExcludes("org.apache.hbase" % "hbase-client" % hbaseVersion % scope),
+  hbaseExcludes("org.apache.hbase" % "hbase-common" % hbaseVersion % scope),
+  hbaseSparkExcludes("org.apache.hbase" % "hbase-spark" % "2.0.0" %
+    scope from ("https://repository.apache.org/content/repositories/snapshots/org/apache/hbase/hbase-spark/" +
+    "2.0.0-SNAPSHOT/hbase-spark-2.0.0-20151019.223543-1.jar"))
 )
 
 val hadoopClientExcludes =
@@ -96,7 +140,15 @@ libraryDependencies ++= Seq(
   hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-common" % hadoopVersion % hadoopDependenciesScope),
   hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-applications-distributedshell" % hadoopVersion % hadoopDependenciesScope),
   hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-server-web-proxy" % hadoopVersion % hadoopDependenciesScope),
-  hadoopClientExcludes("org.apache.hadoop" % "hadoop-client" % hadoopVersion % hadoopDependenciesScope)
+  hadoopClientExcludes("org.apache.hadoop" % "hadoop-client" % hadoopVersion % hadoopDependenciesScope),
+  hbaseSparkExcludes("org.apache.hbase" % "hbase-spark" % "2.0.0" %
+    "compile" from ("https://repository.apache.org/content/repositories/snapshots/org/apache/" +
+    "hbase/hbase-spark/2.0.0-SNAPSHOT/hbase-spark-2.0.0-20151019.223543-1.jar")),
+  hbaseExcludes("org.apache.hbase" % "hbase-client" % hbaseVersion % "compile"),
+  hbaseExcludes("org.apache.hbase" % "hbase-protocol" % hbaseVersion % "compile"),
+  hbaseExcludes("org.apache.hbase" % "hbase-hadoop-compat" % hbaseVersion % "compile"),
+  hbaseExcludes("org.apache.hbase" % "hbase-server" % hbaseVersion % "compile"),
+  hbaseExcludes("org.apache.hbase" % "hbase-common" % hbaseVersion % "compile")
 ) ++ assemblyDependencies(assemblyDependenciesScope)
 
 //http://stackoverflow.com/questions/18838944/how-to-add-provided-dependencies-back-to-run-test-tasks-classpath/21803413#21803413
@@ -108,15 +160,62 @@ fork := true
 parallelExecution in Test := false
 
 headers := Map(
-  "scala" ->(HeaderPattern.cStyleBlockComment, Apache2_0("2015", "David Greco")._2),
-  "conf" ->(HeaderPattern.hashLineComment, Apache2_0("2015", "David Greco")._2)
+  "scala" ->(HeaderPattern.cStyleBlockComment, Apache2_0("2016", "David Greco")._2),
+  "conf" ->(HeaderPattern.hashLineComment, Apache2_0("2016", "David Greco")._2)
 )
 
 lazy val root = (project in file(".")).
   configs(IntegrationTest).
   settings(Defaults.itSettings: _*).
   settings(
-    libraryDependencies += "org.scalatest" % "scalatest_2.10" % scalaTestVersion % "it,test"
+    libraryDependencies ++= Seq(
+      "org.scalatest" % "scalatest_2.10" % scalaTestVersion % "it,test",
+
+      "org.apache.hbase" % "hbase-server" % hbaseVersion % "it,test" classifier "tests"
+        excludeAll ExclusionRule(organization = "org.mortbay.jetty") excludeAll ExclusionRule(organization = "javax.servlet"),
+
+      "org.apache.hbase" % "hbase-server" % hbaseVersion % "it,test" extra "type" -> "test-jar"
+        excludeAll ExclusionRule(organization = "org.mortbay.jetty") excludeAll ExclusionRule(organization = "javax.servlet"),
+
+      "org.apache.hbase" % "hbase-common" % hbaseVersion % "it,test" classifier "tests"
+        excludeAll ExclusionRule(organization = "javax.servlet") excludeAll ExclusionRule(organization = "org.mortbay.jetty"),
+
+      "org.apache.hbase" % "hbase-testing-util" % hbaseVersion % "it,test" classifier "tests"
+        exclude("org.apache.hadoop<", "hadoop-hdfs")
+        exclude("org.apache.hadoop", "hadoop-minicluster")
+        exclude("org.apache.hadoo", "hadoop-client")
+        excludeAll ExclusionRule(organization = "javax.servlet") excludeAll ExclusionRule(organization = "org.mortbay.jetty"),
+
+      "org.apache.hbase" % "hbase-hadoop-compat" % hbaseVersion % "it,test" classifier "tests"
+        excludeAll ExclusionRule(organization = "javax.servlet") excludeAll ExclusionRule(organization = "org.mortbay.jetty"),
+
+      "org.apache.hbase" % "hbase-hadoop-compat" % hbaseVersion % "it,test" classifier "tests" extra "type" -> "test-jar"
+        excludeAll ExclusionRule(organization = "javax.servlet") excludeAll ExclusionRule(organization = "org.mortbay.jetty"),
+
+      "org.apache.hbase" % "hbase-hadoop2-compat" % hbaseVersion % "it,test" classifier "tests" extra "type" -> "test-jar"
+        excludeAll ExclusionRule(organization = "javax.servlet") excludeAll ExclusionRule(organization = "org.mortbay.jetty"),
+
+      "org.apache.hadoop" % "hadoop-client" % hadoopVersion % "it,test" classifier "tests"
+        excludeAll ExclusionRule(organization = "javax.servlet") excludeAll ExclusionRule(organization = "org.mortbay.jetty"),
+
+      "org.apache.hadoop" % "hadoop-hdfs" % hadoopVersion % "it,test" classifier "tests"
+        excludeAll ExclusionRule(organization = "javax.servlet") excludeAll ExclusionRule(organization = "org.mortbay.jetty"),
+
+      "org.apache.hadoop" % "hadoop-hdfs" % hadoopVersion % "it,test" classifier "tests" extra "type" -> "test-jar"
+        excludeAll ExclusionRule(organization = "javax.servlet") excludeAll ExclusionRule(organization = "org.mortbay.jetty"),
+
+      "org.apache.hadoop" % "hadoop-hdfs" % hadoopVersion % "it,test" extra "type" -> "test-jar",
+
+      "org.apache.hadoop" % "hadoop-client" % hadoopVersion % "it,test" classifier "tests",
+
+      "org.apache.hadoop" % "hadoop-minicluster" % hadoopVersion % "it,test",
+
+      "org.apache.hadoop" % "hadoop-common" % hadoopVersion % "it,test" classifier "tests" extra "type" -> "test-jar"
+        excludeAll ExclusionRule(organization = "javax.servlet"),
+
+      "org.apache.hadoop" % "hadoop-mapreduce-client-jobclient" % hadoopVersion % "it,test" classifier "tests"
+        excludeAll ExclusionRule(organization = "javax.servlet")
+    )
   ).
   enablePlugins(AutomateHeaderPlugin).
   enablePlugins(JavaAppPackaging).

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 David Greco
+ * Copyright 2016 David Greco
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 package me.davidgreco.examples.spark
 
-import org.apache.avro.generic.GenericRecord
-import org.apache.avro.mapred.{AvroInputFormat, AvroWrapper}
-import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.Path
-import org.apache.hadoop.io.NullWritable
-import org.apache.spark.sql.SQLContext
+import org.apache.hadoop.hbase.client.{Connection, Put, Result, Scan}
+import org.apache.hadoop.hbase.io.ImmutableBytesWritable
+import org.apache.hadoop.hbase.spark.HBaseContext
+import org.apache.hadoop.hbase.util.Bytes
+import org.apache.hadoop.hbase.{HBaseTestingUtility, TableName}
+import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
 
@@ -29,87 +29,47 @@ case class Person(name: String, age: Int)
 
 class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
 
+  import SparkSpec._
+
+  val hbaseUtil = new HBaseTestingUtility()
+
   var sparkContext: SparkContext = _
 
+  var hbaseContext: HBaseContext = _
+
   override def beforeAll(): Unit = {
+    hbaseUtil.startMiniCluster(1)
+    connection = Some(hbaseUtil.getConnection)
+    hbaseUtil.createTable(TableName.valueOf("MyTable"), Array("MYCF"))
     val conf = new SparkConf().
       setAppName("spark-cdh5-template-local-test").
-      setMaster("local[16]")
+      setMaster("local")
     sparkContext = new SparkContext(conf)
+    hbaseContext = new HBaseContext(sparkContext, hbaseUtil.getConfiguration)
     ()
   }
 
   "Spark" must {
-    "load an avro file as a schema rdd correctly" in {
-
-      val sqlContext = new SQLContext(sparkContext)
-
-      val input = s"file://${System.getProperty("user.dir")}/src/test/resources/test.avro"
-
-      import com.databricks.spark.avro._
-
-      val data = sqlContext.read.avro(input)
-
-      data.registerTempTable("test")
-
-      val res = sqlContext.sql("select * from test where a < 10")
-
-      res.collect().toList.toString must
-        be("List([0,CIAO0], [1,CIAO1], [2,CIAO2], [3,CIAO3], [4,CIAO4], [5,CIAO5], [6,CIAO6], [7,CIAO7], [8,CIAO8], [9,CIAO9])")
+    "load from an HBase table correctly" in {
+      val table = hbaseUtil.getConnection.getTable(TableName.valueOf("MyTable"))
+      for (i <- 1 to 10) {
+        val p = new Put(Bytes.toBytes(i))
+        p.addColumn(Bytes.toBytes("MYCF"), Bytes.toBytes("QF1"), Bytes.toBytes(s"CIAO$i"))
+        table.put(p)
+      }
+      val rdd = hbaseContext.hbaseRDD(TableName.valueOf("MyTable"), new Scan()).asInstanceOf[RDD[(ImmutableBytesWritable, Result)]]
+      rdd.map(p => Bytes.toInt(p._2.getRow)).collect().toList must be(1 to 10)
     }
-  }
 
-  "Spark" must {
-    "load an avro file as generic records" in {
-
-      val input = s"file://${System.getProperty("user.dir")}/src/test/resources/test.avro"
-
-      val rdd = sparkContext.hadoopFile[AvroWrapper[GenericRecord], NullWritable](
-        input,
-        classOf[AvroInputFormat[GenericRecord]],
-        classOf[AvroWrapper[GenericRecord]],
-        classOf[NullWritable]
-      )
-
-      val rows = rdd.map(gr => gr._1.datum().get("b").toString)
-
-      rows.first() must be("CIAO0")
-    }
-  }
-
-  "Spark" must {
-    "save an schema rdd as an avro file correctly" in {
-
-      val sqlContext = new SQLContext(sparkContext)
-
-      import sqlContext.implicits._
-
-      val output = s"file://${System.getProperty("user.dir")}/tmp/test.avro"
-
-      //I delete the output in case it exists
-      val conf = new Configuration()
-      val dir = new Path(output)
-      val fileSystem = dir.getFileSystem(conf)
-      if (fileSystem.exists(dir))
-        fileSystem.delete(dir, true)
-
-      val peopleList: List[Person] = List(Person("David", 50), Person("Ruben", 14), Person("Giuditta", 12), Person("Vita", 19))
-      val people = sparkContext.parallelize[Person](peopleList).toDF()
-      people.registerTempTable("people")
-
-      val teenagers = sqlContext.sql("SELECT * FROM people WHERE age >= 13 AND age <= 19")
-      import com.databricks.spark.avro._
-      teenagers.write.avro(output)
-      //Now I reload the file to check if everything is fine
-      import com.databricks.spark.avro._
-      val data = sqlContext.read.avro(output)
-      data.registerTempTable("teenagers")
-      sqlContext.sql("select * from teenagers").collect().toList.toString must be("List([Ruben,14], [Vita,19])")
-    }
   }
 
   override def afterAll(): Unit = {
     sparkContext.stop()
+    hbaseUtil.shutdownMiniCluster()
   }
 
+}
+
+object SparkSpec {
+  var connection: Option[Connection] = None
 }

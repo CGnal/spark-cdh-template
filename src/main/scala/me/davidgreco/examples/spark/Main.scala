@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 David Greco
+ * Copyright 2016 David Greco
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,13 @@ package me.davidgreco.examples.spark
 
 import java.io.File
 
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.hbase.TableName
+import org.apache.hadoop.hbase.client.{Result, Scan}
+import org.apache.hadoop.hbase.io.ImmutableBytesWritable
+import org.apache.hadoop.hbase.spark.HBaseContext
+import org.apache.hadoop.hbase.util.Bytes
+import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 
 object Main extends App {
@@ -66,9 +73,11 @@ object Main extends App {
   }
 
   val sparkContext = new SparkContext(conf)
+  val hbaseContext = new HBaseContext(sparkContext, new Configuration())
 
-  val rdd = sparkContext.parallelize[Int](1 to 10000)
-  println(rdd.count())
+  val rdd = hbaseContext.hbaseRDD(TableName.valueOf("Documents"), new Scan()).asInstanceOf[RDD[(ImmutableBytesWritable, Result)]]
+
+  rdd.map(p => Bytes.toString(p._2.getRow)).collect().foreach(println(_))
 
   sparkContext.stop()
 
