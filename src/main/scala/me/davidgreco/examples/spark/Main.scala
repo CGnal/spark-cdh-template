@@ -75,7 +75,7 @@ object Main extends App {
   val sparkContext = new SparkContext(conf)
   val hbaseContext = new HBaseContext(sparkContext, new Configuration())
 
-  val rdd = hbaseContext.hbaseRDD(TableName.valueOf("Documents"), new Scan()).asInstanceOf[RDD[(ImmutableBytesWritable, Result)]]
+  val rdd = hbaseContext.hbaseRDD(TableName.valueOf("Documents"), new Scan())
 
   rdd.map(p => Bytes.toString(p._2.getRow)).collect().foreach(println(_))
 
