@@ -164,57 +164,37 @@ headers := Map(
   "conf" ->(HeaderPattern.hashLineComment, Apache2_0("2016", "David Greco")._2)
 )
 
+val hadoopHBaseExcludes =
+  (moduleId: ModuleID) => moduleId.
+    exclude("org.slf4j", "slf4j-log4j12").
+    exclude("javax.servlet", "servlet-api").
+    excludeAll(ExclusionRule(organization = "org.mortbay.jetty")).
+    excludeAll(ExclusionRule(organization = "javax.servlet"))
+
 lazy val root = (project in file(".")).
   configs(IntegrationTest).
   settings(Defaults.itSettings: _*).
   settings(
     libraryDependencies ++= Seq(
-      "org.scalatest" % "scalatest_2.10" % scalaTestVersion % "it,test",
-
-      "org.apache.hbase" % "hbase-server" % hbaseVersion % "it,test" classifier "tests"
-        excludeAll ExclusionRule(organization = "org.mortbay.jetty") excludeAll ExclusionRule(organization = "javax.servlet"),
-
-      "org.apache.hbase" % "hbase-server" % hbaseVersion % "it,test" extra "type" -> "test-jar"
-        excludeAll ExclusionRule(organization = "org.mortbay.jetty") excludeAll ExclusionRule(organization = "javax.servlet"),
-
-      "org.apache.hbase" % "hbase-common" % hbaseVersion % "it,test" classifier "tests"
-        excludeAll ExclusionRule(organization = "javax.servlet") excludeAll ExclusionRule(organization = "org.mortbay.jetty"),
-
-      "org.apache.hbase" % "hbase-testing-util" % hbaseVersion % "it,test" classifier "tests"
+      hadoopHBaseExcludes("org.scalatest" % "scalatest_2.10" % scalaTestVersion % "it,test"),
+      hadoopHBaseExcludes("org.apache.hbase" % "hbase-server" % hbaseVersion % "it,test" classifier "tests"),
+      hadoopHBaseExcludes("org.apache.hbase" % "hbase-server" % hbaseVersion % "it,test" extra "type" -> "test-jar"),
+      hadoopHBaseExcludes("org.apache.hbase" % "hbase-common" % hbaseVersion % "it,test" classifier "tests"),
+      hadoopHBaseExcludes("org.apache.hbase" % "hbase-testing-util" % hbaseVersion % "it,test" classifier "tests"
         exclude("org.apache.hadoop<", "hadoop-hdfs")
         exclude("org.apache.hadoop", "hadoop-minicluster")
-        exclude("org.apache.hadoo", "hadoop-client")
-        excludeAll ExclusionRule(organization = "javax.servlet") excludeAll ExclusionRule(organization = "org.mortbay.jetty"),
-
-      "org.apache.hbase" % "hbase-hadoop-compat" % hbaseVersion % "it,test" classifier "tests"
-        excludeAll ExclusionRule(organization = "javax.servlet") excludeAll ExclusionRule(organization = "org.mortbay.jetty"),
-
-      "org.apache.hbase" % "hbase-hadoop-compat" % hbaseVersion % "it,test" classifier "tests" extra "type" -> "test-jar"
-        excludeAll ExclusionRule(organization = "javax.servlet") excludeAll ExclusionRule(organization = "org.mortbay.jetty"),
-
-      "org.apache.hbase" % "hbase-hadoop2-compat" % hbaseVersion % "it,test" classifier "tests" extra "type" -> "test-jar"
-        excludeAll ExclusionRule(organization = "javax.servlet") excludeAll ExclusionRule(organization = "org.mortbay.jetty"),
-
-      "org.apache.hadoop" % "hadoop-client" % hadoopVersion % "it,test" classifier "tests"
-        excludeAll ExclusionRule(organization = "javax.servlet") excludeAll ExclusionRule(organization = "org.mortbay.jetty"),
-
-      "org.apache.hadoop" % "hadoop-hdfs" % hadoopVersion % "it,test" classifier "tests"
-        excludeAll ExclusionRule(organization = "javax.servlet") excludeAll ExclusionRule(organization = "org.mortbay.jetty"),
-
-      "org.apache.hadoop" % "hadoop-hdfs" % hadoopVersion % "it,test" classifier "tests" extra "type" -> "test-jar"
-        excludeAll ExclusionRule(organization = "javax.servlet") excludeAll ExclusionRule(organization = "org.mortbay.jetty"),
-
-      "org.apache.hadoop" % "hadoop-hdfs" % hadoopVersion % "it,test" extra "type" -> "test-jar",
-
-      "org.apache.hadoop" % "hadoop-client" % hadoopVersion % "it,test" classifier "tests",
-
-      "org.apache.hadoop" % "hadoop-minicluster" % hadoopVersion % "it,test",
-
-      "org.apache.hadoop" % "hadoop-common" % hadoopVersion % "it,test" classifier "tests" extra "type" -> "test-jar"
-        excludeAll ExclusionRule(organization = "javax.servlet"),
-
-      "org.apache.hadoop" % "hadoop-mapreduce-client-jobclient" % hadoopVersion % "it,test" classifier "tests"
-        excludeAll ExclusionRule(organization = "javax.servlet")
+        exclude("org.apache.hadoo", "hadoop-client")),
+      hadoopHBaseExcludes("org.apache.hbase" % "hbase-hadoop-compat" % hbaseVersion % "it,test" classifier "tests"),
+      hadoopHBaseExcludes("org.apache.hbase" % "hbase-hadoop-compat" % hbaseVersion % "it,test" classifier "tests" extra "type" -> "test-jar"),
+      hadoopHBaseExcludes("org.apache.hbase" % "hbase-hadoop2-compat" % hbaseVersion % "it,test" classifier "tests" extra "type" -> "test-jar"),
+      hadoopHBaseExcludes("org.apache.hadoop" % "hadoop-client" % hadoopVersion % "it,test" classifier "tests"),
+      hadoopHBaseExcludes("org.apache.hadoop" % "hadoop-hdfs" % hadoopVersion % "it,test" classifier "tests"),
+      hadoopHBaseExcludes("org.apache.hadoop" % "hadoop-hdfs" % hadoopVersion % "it,test" classifier "tests" extra "type" -> "test-jar"),
+      hadoopHBaseExcludes("org.apache.hadoop" % "hadoop-hdfs" % hadoopVersion % "it,test" extra "type" -> "test-jar"),
+      hadoopHBaseExcludes("org.apache.hadoop" % "hadoop-client" % hadoopVersion % "it,test" classifier "tests"),
+      hadoopHBaseExcludes("org.apache.hadoop" % "hadoop-minicluster" % hadoopVersion % "it,test"),
+      hadoopHBaseExcludes("org.apache.hadoop" % "hadoop-common" % hadoopVersion % "it,test" classifier "tests" extra "type" -> "test-jar"),
+      hadoopHBaseExcludes("org.apache.hadoop" % "hadoop-mapreduce-client-jobclient" % hadoopVersion % "it,test" classifier "tests")
     )
   ).
   enablePlugins(AutomateHeaderPlugin).

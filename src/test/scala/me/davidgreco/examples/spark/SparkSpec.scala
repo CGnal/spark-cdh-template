@@ -25,8 +25,6 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
 
-case class Person(name: String, age: Int)
-
 class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
 
   import SparkSpec._
