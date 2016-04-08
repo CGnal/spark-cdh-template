@@ -46,13 +46,13 @@ wartremoverErrors ++= Seq(
   Wart.Nothing
 )
 
-val sparkVersion = "1.5.0-cdh5.5.2"
+val sparkVersion = "1.6.0-cdh5.7.0"
 
-val hadoopVersion = "2.6.0-cdh5.5.2"
+val hadoopVersion = "2.6.0-cdh5.7.0"
 
-val hbaseVersion = "1.0.0-cdh5.5.2"
+val hbaseVersion = "1.2.0-cdh5.7.0"
 
-val sparkAvroVersion = "1.1.0-cdh5.5.2"
+val sparkAvroVersion = "1.1.0-cdh5.7.0"
 
 val scalaTestVersion = "2.2.6"
 
@@ -71,7 +71,9 @@ val sparkExcludes =
     exclude("org.apache.hadoop", "hadoop-yarn-common").
     exclude("org.apache.hadoop", "hadoop-yarn-server-common").
     exclude("org.apache.hadoop", "hadoop-yarn-server-web-proxy").
-    exclude("org.apache.zookeeper", "zookeeper")
+    exclude("org.apache.zookeeper", "zookeeper").
+    exclude("commons-collections", "commons-collections").
+    exclude("commons-beanutils", "commons-beanutils")
 
 val hbaseExcludes =
   (moduleID: ModuleID) => moduleID.
@@ -95,26 +97,9 @@ val hbaseExcludes =
     exclude("com.google.guava", "guava").
     exclude("io.netty", "netty")
 
-val hbaseSparkExcludes =
-  (moduleID: ModuleID) => moduleID.
-    exclude("org.apache.hbase", "hbase-hadoop-compat").
-    exclude("org.apache.hbase", "hbase-protocol").
-    exclude("org.apache.hbase", "hbase-server").
-    exclude("org.apache.hbase", "hbase-client").
-    exclude("org.apache.hbase", "hbase-common").
-    exclude("org.apache.zookeeper", "zookeeper").
-    exclude("org.apache.spark", "spark-core")
-
 val assemblyDependencies = (scope: String) => Seq(
   sparkExcludes("org.apache.spark" %% "spark-streaming-kafka" % sparkVersion % scope),
-  hbaseExcludes("org.apache.hbase" % "hbase-hadoop-compat" % hbaseVersion % scope),
-  hbaseExcludes("org.apache.hbase" % "hbase-protocol" % hbaseVersion % scope),
-  hbaseExcludes("org.apache.hbase" % "hbase-server" % hbaseVersion % scope),
-  hbaseExcludes("org.apache.hbase" % "hbase-client" % hbaseVersion % scope),
-  hbaseExcludes("org.apache.hbase" % "hbase-common" % hbaseVersion % scope),
-  hbaseSparkExcludes("org.apache.hbase" % "hbase-spark" % "2.0.0" %
-    scope from ("https://repository.apache.org/content/repositories/snapshots/org/apache/hbase/hbase-spark/" +
-    "2.0.0-SNAPSHOT/hbase-spark-2.0.0-20151019.223543-1.jar"))
+  sparkExcludes("org.apache.hbase" % "hbase-spark" % hbaseVersion % scope)
 )
 
 val hadoopClientExcludes =
@@ -141,14 +126,12 @@ libraryDependencies ++= Seq(
   hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-applications-distributedshell" % hadoopVersion % hadoopDependenciesScope),
   hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-server-web-proxy" % hadoopVersion % hadoopDependenciesScope),
   hadoopClientExcludes("org.apache.hadoop" % "hadoop-client" % hadoopVersion % hadoopDependenciesScope),
-  hbaseSparkExcludes("org.apache.hbase" % "hbase-spark" % "2.0.0" %
-    "compile" from ("https://repository.apache.org/content/repositories/snapshots/org/apache/" +
-    "hbase/hbase-spark/2.0.0-SNAPSHOT/hbase-spark-2.0.0-20151019.223543-1.jar")),
-  hbaseExcludes("org.apache.hbase" % "hbase-client" % hbaseVersion % "compile"),
-  hbaseExcludes("org.apache.hbase" % "hbase-protocol" % hbaseVersion % "compile"),
-  hbaseExcludes("org.apache.hbase" % "hbase-hadoop-compat" % hbaseVersion % "compile"),
-  hbaseExcludes("org.apache.hbase" % "hbase-server" % hbaseVersion % "compile"),
-  hbaseExcludes("org.apache.hbase" % "hbase-common" % hbaseVersion % "compile")
+  sparkExcludes("org.apache.hbase" % "hbase-spark" % hbaseVersion % hadoopDependenciesScope),
+  hbaseExcludes("org.apache.hbase" % "hbase-client" % hbaseVersion % hadoopDependenciesScope),
+  hbaseExcludes("org.apache.hbase" % "hbase-protocol" % hbaseVersion % hadoopDependenciesScope),
+  hbaseExcludes("org.apache.hbase" % "hbase-hadoop-compat" % hbaseVersion % hadoopDependenciesScope),
+  hbaseExcludes("org.apache.hbase" % "hbase-server" % hbaseVersion % hadoopDependenciesScope),
+  hbaseExcludes("org.apache.hbase" % "hbase-common" % hbaseVersion % hadoopDependenciesScope)
 ) ++ assemblyDependencies(assemblyDependenciesScope)
 
 //http://stackoverflow.com/questions/18838944/how-to-add-provided-dependencies-back-to-run-test-tasks-classpath/21803413#21803413
@@ -218,7 +201,8 @@ lazy val projectAssembly = (project in file("assembly")).
   projectDependencies := {
     Seq(
       (projectID in root).value.excludeAll(ExclusionRule(organization = "org.apache.spark"),
-        if (!isALibrary) ExclusionRule(organization = "org.apache.hadoop") else ExclusionRule())
+        if (!isALibrary) ExclusionRule(organization = "org.apache.hadoop") else ExclusionRule(),
+        if (!isALibrary) ExclusionRule(organization = "org.apache.hbase") else ExclusionRule())
     )
   })
 

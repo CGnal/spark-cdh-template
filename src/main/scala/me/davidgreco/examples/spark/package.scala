@@ -24,7 +24,7 @@ package object spark {
   def addPath(dir: String): Unit = {
     val method = classOf[URLClassLoader].getDeclaredMethod("addURL", classOf[URL])
     method.setAccessible(true)
-    method.invoke(ClassLoader.getSystemClassLoader, new File(dir).toURI.toURL)
+    method.invoke(Thread.currentThread().getContextClassLoader, new File(dir).toURI.toURL)
     ()
   }
 
