@@ -95,11 +95,20 @@ val hbaseExcludes =
     exclude("org.jboss.netty", "netty").
     exclude("io.netty", "netty").
     exclude("com.google.guava", "guava").
-    exclude("io.netty", "netty")
+    exclude("io.netty", "netty").
+    exclude("commons-logging", "commons-logging").
+    exclude("org.apache.xmlgraphics", "batik-ext").
+    exclude("commons-collections", "commons-collections").
+    exclude("xom", "xom")
 
 val assemblyDependencies = (scope: String) => Seq(
   sparkExcludes("org.apache.spark" %% "spark-streaming-kafka" % sparkVersion % scope),
-  sparkExcludes("org.apache.hbase" % "hbase-spark" % hbaseVersion % scope)
+  sparkExcludes("org.apache.hbase" % "hbase-spark" % hbaseVersion % scope),
+  hbaseExcludes("org.apache.hbase" % "hbase-client" % hbaseVersion % scope),
+  hbaseExcludes("org.apache.hbase" % "hbase-protocol" % hbaseVersion % scope),
+  hbaseExcludes("org.apache.hbase" % "hbase-hadoop-compat" % hbaseVersion % scope),
+  hbaseExcludes("org.apache.hbase" % "hbase-server" % hbaseVersion % scope),
+  hbaseExcludes("org.apache.hbase" % "hbase-common" % hbaseVersion % scope)
 )
 
 val hadoopClientExcludes =
@@ -114,24 +123,18 @@ lazy val assemblyDependenciesScope: String = if (isALibrary) "compile" else "pro
 lazy val hadoopDependenciesScope = if (isALibrary) "provided" else "compile"
 
 libraryDependencies ++= Seq(
-  sparkExcludes("com.databricks" %% "spark-avro" % sparkAvroVersion % "compile"),
-  sparkExcludes("org.apache.spark" %% "spark-core" % sparkVersion % "compile"),
-  sparkExcludes("org.apache.spark" %% "spark-sql" % sparkVersion % "compile"),
-  sparkExcludes("org.apache.spark" %% "spark-yarn" % sparkVersion % "compile"),
-  sparkExcludes("org.apache.spark" %% "spark-mllib" % sparkVersion % "compile"),
-  sparkExcludes("org.apache.spark" %% "spark-streaming" % sparkVersion % "compile"),
+  sparkExcludes("com.databricks" %% "spark-avro" % sparkAvroVersion % hadoopDependenciesScope),
+  sparkExcludes("org.apache.spark" %% "spark-core" % sparkVersion % hadoopDependenciesScope),
+  sparkExcludes("org.apache.spark" %% "spark-sql" % sparkVersion % hadoopDependenciesScope),
+  sparkExcludes("org.apache.spark" %% "spark-yarn" % sparkVersion % hadoopDependenciesScope),
+  sparkExcludes("org.apache.spark" %% "spark-mllib" % sparkVersion % hadoopDependenciesScope),
+  sparkExcludes("org.apache.spark" %% "spark-streaming" % sparkVersion % hadoopDependenciesScope),
   hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-api" % hadoopVersion % hadoopDependenciesScope),
   hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-client" % hadoopVersion % hadoopDependenciesScope),
   hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-common" % hadoopVersion % hadoopDependenciesScope),
   hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-applications-distributedshell" % hadoopVersion % hadoopDependenciesScope),
   hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-server-web-proxy" % hadoopVersion % hadoopDependenciesScope),
-  hadoopClientExcludes("org.apache.hadoop" % "hadoop-client" % hadoopVersion % hadoopDependenciesScope),
-  sparkExcludes("org.apache.hbase" % "hbase-spark" % hbaseVersion % hadoopDependenciesScope),
-  hbaseExcludes("org.apache.hbase" % "hbase-client" % hbaseVersion % hadoopDependenciesScope),
-  hbaseExcludes("org.apache.hbase" % "hbase-protocol" % hbaseVersion % hadoopDependenciesScope),
-  hbaseExcludes("org.apache.hbase" % "hbase-hadoop-compat" % hbaseVersion % hadoopDependenciesScope),
-  hbaseExcludes("org.apache.hbase" % "hbase-server" % hbaseVersion % hadoopDependenciesScope),
-  hbaseExcludes("org.apache.hbase" % "hbase-common" % hbaseVersion % hadoopDependenciesScope)
+  hadoopClientExcludes("org.apache.hadoop" % "hadoop-client" % hadoopVersion % hadoopDependenciesScope)
 ) ++ assemblyDependencies(assemblyDependenciesScope)
 
 //http://stackoverflow.com/questions/18838944/how-to-add-provided-dependencies-back-to-run-test-tasks-classpath/21803413#21803413
@@ -161,7 +164,7 @@ lazy val root = (project in file(".")).
     libraryDependencies ++= Seq(
       hadoopHBaseExcludes("org.scalatest" % "scalatest_2.10" % scalaTestVersion % "it,test"),
       hadoopHBaseExcludes("org.apache.hbase" % "hbase-server" % hbaseVersion % "it,test" classifier "tests"),
-      hadoopHBaseExcludes("org.apache.hbase" % "hbase-server" % hbaseVersion % "it,test" extra "type" -> "test-jar"),
+      //hadoopHBaseExcludes("org.apache.hbase" % "hbase-server" % hbaseVersion % "it,test" extra "type" -> "test-jar"),
       hadoopHBaseExcludes("org.apache.hbase" % "hbase-common" % hbaseVersion % "it,test" classifier "tests"),
       hadoopHBaseExcludes("org.apache.hbase" % "hbase-testing-util" % hbaseVersion % "it,test" classifier "tests"
         exclude("org.apache.hadoop<", "hadoop-hdfs")
