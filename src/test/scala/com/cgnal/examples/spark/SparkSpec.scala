@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 David Greco
+ * Copyright 2016 CGnal S.p.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package me.davidgreco.examples.spark
+package com.cgnal.examples.spark
 
 import org.apache.avro.generic.GenericRecord
-import org.apache.avro.mapred.{AvroInputFormat, AvroWrapper}
+import org.apache.avro.mapred.{ AvroInputFormat, AvroWrapper }
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.io.NullWritable
 import org.apache.spark.sql.SQLContext
-import org.apache.spark.{SparkConf, SparkContext}
-import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
+import org.apache.spark.{ SparkConf, SparkContext }
+import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 
 case class Person(name: String, age: Int)
 

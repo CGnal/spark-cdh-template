@@ -1,8 +1,7 @@
-import de.heikoseeberger.sbtheader.HeaderPattern
 import de.heikoseeberger.sbtheader.license.Apache2_0
 import sbt._
 
-organization := "me.davidgreco"
+organization := "com.cgnal"
 
 name := "spark-cdh5-template"
 
@@ -107,16 +106,17 @@ fork := true
 
 parallelExecution in Test := false
 
-headers := Map(
-  "scala" ->(HeaderPattern.cStyleBlockComment, Apache2_0("2015", "David Greco")._2),
-  "conf" ->(HeaderPattern.hashLineComment, Apache2_0("2015", "David Greco")._2)
-)
-
 lazy val root = (project in file(".")).
   configs(IntegrationTest).
   settings(Defaults.itSettings: _*).
   settings(
-    libraryDependencies += "org.scalatest" % "scalatest_2.10" % scalaTestVersion % "it,test"
+    libraryDependencies += "org.scalatest" % "scalatest_2.10" % scalaTestVersion % "it,test",
+    headers := Map(
+      "sbt" -> Apache2_0("2016", "CGnal S.p.A."),
+      "scala" -> Apache2_0("2016", "CGnal S.p.A."),
+      "conf" -> Apache2_0("2016", "CGnal S.p.A.", "#"),
+      "properties" -> Apache2_0("2016", "CGnal S.p.A.", "#")
+    )
   ).
   enablePlugins(AutomateHeaderPlugin).
   enablePlugins(JavaAppPackaging).
