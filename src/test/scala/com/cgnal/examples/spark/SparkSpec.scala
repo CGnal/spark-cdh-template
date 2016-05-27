@@ -78,7 +78,7 @@ class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
       }
 
       val startDateTime = now.minusDays(99)
-      val stopDateTime = now.plusDays(1)
+      val stopDateTime = now.plusSeconds(1)
 
       val scans = getScans(startDateTime, stopDateTime)
 
