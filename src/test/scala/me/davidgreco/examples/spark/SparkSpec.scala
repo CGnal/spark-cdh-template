@@ -92,6 +92,8 @@ class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
       }).collect().sorted
 
       values must be(1 to 100)
+
+      hbaseUtil.deleteTable(TableName.valueOf("MyTable"))
     }
   }
 
