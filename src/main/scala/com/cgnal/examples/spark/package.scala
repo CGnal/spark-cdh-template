@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 David Greco
+ * Copyright 2016 CGnal S.p.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package me.davidgreco.examples
+package com.cgnal.examples
 
 import java.io.File
-import java.net.{URL, URLClassLoader}
+import java.net.{ URL, URLClassLoader }
 
 package object spark {
   //Simple function for adding a directory to the system classpath

@@ -2,7 +2,7 @@ import de.heikoseeberger.sbtheader.HeaderPattern
 import de.heikoseeberger.sbtheader.license.Apache2_0
 import sbt.{ExclusionRule, _}
 
-organization := "me.davidgreco"
+organization := "com.cgnal"
 
 name := "spark-cdh5-template"
 
@@ -145,11 +145,6 @@ fork := true
 
 parallelExecution in Test := false
 
-headers := Map(
-  "scala" ->(HeaderPattern.cStyleBlockComment, Apache2_0("2016", "David Greco")._2),
-  "conf" ->(HeaderPattern.hashLineComment, Apache2_0("2016", "David Greco")._2)
-)
-
 val hadoopHBaseExcludes =
   (moduleId: ModuleID) => moduleId.
     exclude("org.slf4j", "slf4j-log4j12").
@@ -181,6 +176,12 @@ lazy val root = (project in file(".")).
       hadoopHBaseExcludes("org.apache.hadoop" % "hadoop-minicluster" % hadoopVersion % "it,test"),
       hadoopHBaseExcludes("org.apache.hadoop" % "hadoop-common" % hadoopVersion % "it,test" classifier "tests" extra "type" -> "test-jar"),
       hadoopHBaseExcludes("org.apache.hadoop" % "hadoop-mapreduce-client-jobclient" % hadoopVersion % "it,test" classifier "tests")
+    ),
+    headers := Map(
+      "sbt" -> Apache2_0("2016", "CGnal S.p.A."),
+      "scala" -> Apache2_0("2016", "CGnal S.p.A."),
+      "conf" -> Apache2_0("2016", "CGnal S.p.A.","#"),
+      "properties" -> Apache2_0("2016", "CGnal S.p.A.", "#")
     )
   ).
   enablePlugins(AutomateHeaderPlugin).

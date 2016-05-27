@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 David Greco
+ * Copyright 2016 CGnal S.p.A.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.davidgreco.examples.spark
+package com.cgnal.examples.spark
 
 import java.io.File
 
@@ -23,7 +23,7 @@ import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client.Scan
 import org.apache.hadoop.hbase.spark.HBaseContext
 import org.apache.hadoop.hbase.util.Bytes
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.{ SparkConf, SparkContext }
 
 object Main extends App {
 
