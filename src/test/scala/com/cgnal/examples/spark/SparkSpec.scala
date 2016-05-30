@@ -68,16 +68,16 @@ class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
     "support key salting correctly" in {
       hbaseUtil.createTable(TableName.valueOf("MyTable"), Array("MYCF"))
       val table: Table = hbaseUtil.getConnection.getTable(TableName.valueOf("MyTable"))
-
+      val n = 100
       val now = LocalDateTime.now()
-      for (i <- 1 to 100) {
+      for (i <- 1 to n) {
         val rowKey = computeKey(s"ID$i", now.minusDays(i.toLong - 1))
         val p = new Put(rowKey)
         p.addColumn(Bytes.toBytes("MYCF"), Bytes.toBytes("QF1"), Bytes.toBytes(i))
         table.put(p)
       }
 
-      val startDateTime = now.minusDays(99)
+      val startDateTime = now.minusDays(n.toLong)
       val stopDateTime = now.plusSeconds(1)
 
       val scans = getScans(startDateTime, stopDateTime)
@@ -91,7 +91,7 @@ class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
         Bytes.toInt(value)
       }).collect().sorted
 
-      values must be(1 to 100)
+      values must be(1 to n)
 
       hbaseUtil.deleteTable(TableName.valueOf("MyTable"))
     }
