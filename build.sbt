@@ -9,7 +9,7 @@ version in ThisBuild := "1.0"
 
 val assemblyName = "spark-cdh-template-assembly"
 
-scalaVersion := "2.10.5"
+scalaVersion := "2.10.6"
 
 ivyScala := ivyScala.value map {
   _.copy(overrideScalaVersion = true)
@@ -84,12 +84,12 @@ lazy val assemblyDependenciesScope: String = if (isALibrary) "compile" else "pro
 lazy val hadoopDependenciesScope = if (isALibrary) "provided" else "compile"
 
 libraryDependencies ++= Seq(
-  sparkExcludes("com.databricks" %% "spark-avro" % sparkAvroVersion % "compile"),
-  sparkExcludes("org.apache.spark" %% "spark-core" % sparkVersion % "compile"),
-  sparkExcludes("org.apache.spark" %% "spark-sql" % sparkVersion % "compile"),
-  sparkExcludes("org.apache.spark" %% "spark-yarn" % sparkVersion % "compile"),
-  sparkExcludes("org.apache.spark" %% "spark-mllib" % sparkVersion % "compile"),
-  sparkExcludes("org.apache.spark" %% "spark-streaming" % sparkVersion % "compile"),
+  sparkExcludes("com.databricks" %% "spark-avro" % sparkAvroVersion % hadoopDependenciesScope),
+  sparkExcludes("org.apache.spark" %% "spark-core" % sparkVersion % hadoopDependenciesScope),
+  sparkExcludes("org.apache.spark" %% "spark-sql" % sparkVersion % hadoopDependenciesScope),
+  sparkExcludes("org.apache.spark" %% "spark-yarn" % sparkVersion % hadoopDependenciesScope),
+  sparkExcludes("org.apache.spark" %% "spark-mllib" % sparkVersion % hadoopDependenciesScope),
+  sparkExcludes("org.apache.spark" %% "spark-streaming" % sparkVersion % hadoopDependenciesScope),
   hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-api" % hadoopVersion % hadoopDependenciesScope),
   hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-client" % hadoopVersion % hadoopDependenciesScope),
   hadoopClientExcludes("org.apache.hadoop" % "hadoop-yarn-common" % hadoopVersion % hadoopDependenciesScope),
