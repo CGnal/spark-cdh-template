@@ -24,6 +24,7 @@ import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
 
 class SparkIntegrationSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
 
+  @SuppressWarnings(Array("org.wartremover.warts.Var"))
   var sparkContext: SparkContext = _
 
   def getJar(klass: Class[_]): String = {
@@ -39,7 +40,7 @@ class SparkIntegrationSpec extends WordSpec with MustMatchers with BeforeAndAfte
 
     val hadoop_conf_dir = Option(System.getenv("HADOOP_CONF_DIR"))
 
-    hadoop_conf_dir.fold(assert(false, "please set the HADOOP_CONF_DIR env variable"))(addPath(_))
+    hadoop_conf_dir.fold(Predef.assert(false, "please set the HADOOP_CONF_DIR env variable"))(addPath(_))
 
     val uberJarLocation = s"${System.getProperty("user.dir")}/assembly/target/scala-2.10/spark-cdh-template-assembly-1.0.jar"
 
@@ -68,8 +69,9 @@ class SparkIntegrationSpec extends WordSpec with MustMatchers with BeforeAndAfte
 
       val fs = FileSystem.get(new Configuration())
       val input = s"/user/${System.getProperty("user.name")}/test.avro"
-      if (fs.exists(new Path(input)))
-        fs.delete(new Path(input), true)
+      if (fs.exists(new Path(input))) {
+        val _ = fs.delete(new Path(input), true)
+      }
       fs.copyFromLocalFile(
         false,
         true,

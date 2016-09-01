@@ -25,10 +25,12 @@ import org.apache.spark.sql.SQLContext
 import org.apache.spark.{ SparkConf, SparkContext }
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 
-case class Person(name: String, age: Int)
+@SuppressWarnings(Array("org.wartremover.warts.Overloading"))
+final case class Person(name: String, age: Int)
 
 class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
 
+  @SuppressWarnings(Array("org.wartremover.warts.Var"))
   var sparkContext: SparkContext = _
 
   override def beforeAll(): Unit = {
@@ -70,7 +72,7 @@ class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
         classOf[AvroWrapper[GenericRecord]],
         classOf[NullWritable]
       )
-
+      @SuppressWarnings(Array("org.wartremover.warts.ToString"))
       val rows = rdd.map(gr => gr._1.datum().get("b").toString)
 
       rows.first() must be("CIAO0")
@@ -90,10 +92,12 @@ class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
       val conf = new Configuration()
       val dir = new Path(output)
       val fileSystem = dir.getFileSystem(conf)
-      if (fileSystem.exists(dir))
-        fileSystem.delete(dir, true)
+      if (fileSystem.exists(dir)) {
+        val _ = fileSystem.delete(dir, true)
+      }
 
       val peopleList: List[Person] = List(Person("David", 50), Person("Ruben", 14), Person("Giuditta", 12), Person("Vita", 19))
+      @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
       val people = sparkContext.parallelize[Person](peopleList).toDF()
       people.registerTempTable("people")
 

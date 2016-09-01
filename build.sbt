@@ -37,21 +37,45 @@ scalacOptions ++= Seq(
 wartremoverErrors ++= Seq(
   Wart.Any,
   Wart.Any2StringAdd,
+  Wart.AsInstanceOf,
+  Wart.DefaultArguments,
   Wart.EitherProjectionPartial,
-  Wart.OptionPartial,
-  Wart.Product,
-  Wart.Serializable,
+  Wart.Enumeration,
+  Wart.Equals,
+  Wart.ExplicitImplicitTypes,
+  Wart.FinalCaseClass,
+  Wart.FinalVal,
+  Wart.ImplicitConversion,
+  Wart.IsInstanceOf,
+  Wart.JavaConversions,
+  Wart.LeakingSealed,
   Wart.ListOps,
-  Wart.Nothing
+  Wart.MutableDataStructures,
+  //Wart.NoNeedForMonad,
+  Wart.NonUnitStatements,
+  Wart.Nothing,
+  Wart.Null,
+  Wart.Option2Iterable,
+  Wart.OptionPartial,
+  Wart.Overloading,
+  Wart.Product,
+  Wart.Return,
+  Wart.Serializable,
+  Wart.Throw,
+  Wart.ToString,
+  Wart.TryPartial,
+  Wart.Var,
+  Wart.While
 )
 
-val sparkVersion = "1.6.0-cdh5.7.0"
 
-val hadoopVersion = "2.6.0-cdh5.7.0"
+val sparkVersion = "1.6.0-cdh5.8.0"
 
-val sparkAvroVersion = "1.1.0-cdh5.7.0"
+val hadoopVersion = "2.6.0-cdh5.8.0"
 
-val scalaTestVersion = "2.2.6"
+val sparkAvroVersion = "1.1.0-cdh5.8.0"
+
+val scalaTestVersion = "3.0.0"
 
 resolvers ++= Seq(
   "cloudera" at "https://repository.cloudera.com/artifactory/cloudera-repos/"

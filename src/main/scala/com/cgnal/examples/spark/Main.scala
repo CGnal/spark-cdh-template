@@ -42,13 +42,13 @@ object Main extends App {
 
     addPath(args(0))
 
-    if (yarn)
-      conf.
+    if (yarn) {
+      val _ = conf.
         setMaster("yarn-client").
         setAppName("spark-cdh5-template-yarn").
         setJars(List(uberJarLocation)).
         set("spark.yarn.jar", "local:/opt/cloudera/parcels/CDH/lib/spark/assembly/lib/spark-assembly.jar").
-        set("spark.executor.extraClassPath", "/opt/cloudera/parcels/CDH/jars/*"). //This is an hack I made I'm not sure why it works though
+        //set("spark.executor.extraClassPath", "/opt/cloudera/parcels/CDH/jars/*"). //This is an hack I made I'm not sure why it works though
         set("spark.serializer", "org.apache.spark.serializer.KryoSerializer").
         set("spark.io.compression.codec", "lzf").
         set("spark.speculation", "true").
@@ -59,10 +59,11 @@ object Main extends App {
         set("spark.dynamicAllocation.minExecutors", Integer.toString(minExecutors)).
         set("spark.executor.cores", Integer.toString(1)).
         set("spark.executor.memory", "256m")
-    else
-      conf.
+    } else {
+      val _ = conf.
         setAppName("spark-cdh5-template-local").
         setMaster("local[16]")
+    }
   }
 
   val sparkContext = new SparkContext(conf)
