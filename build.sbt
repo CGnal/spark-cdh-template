@@ -9,7 +9,7 @@ version in ThisBuild := "1.0"
 
 val assemblyName = "spark-cdh-template-assembly"
 
-scalaVersion := "2.10.6"
+scalaVersion in ThisBuild := "2.11.8"
 
 ivyScala := ivyScala.value map {
   _.copy(overrideScalaVersion = true)
@@ -69,11 +69,11 @@ wartremoverErrors ++= Seq(
 )
 
 
-val sparkVersion = "1.6.0-cdh5.8.0"
+val sparkVersion = "2.0.0.cloudera.beta2"
 
-val hadoopVersion = "2.6.0-cdh5.8.0"
+val hadoopVersion = "2.6.0-cdh5.8.2"
 
-val sparkAvroVersion = "1.1.0-cdh5.8.0"
+val sparkAvroVersion = "3.0.1"
 
 val scalaTestVersion = "3.0.0"
 
@@ -93,7 +93,7 @@ val sparkExcludes =
     exclude("org.apache.hadoop", "hadoop-yarn-server-web-proxy")
 
 val assemblyDependencies = (scope: String) => Seq(
-  sparkExcludes("org.apache.spark" %% "spark-streaming-kafka" % sparkVersion % scope)
+  sparkExcludes("org.apache.spark" %% "spark-streaming-kafka-0-8" % sparkVersion % hadoopDependenciesScope)
 )
 
 val hadoopClientExcludes =
@@ -134,7 +134,7 @@ lazy val root = (project in file(".")).
   configs(IntegrationTest).
   settings(Defaults.itSettings: _*).
   settings(
-    libraryDependencies += "org.scalatest" % "scalatest_2.10" % scalaTestVersion % "it,test",
+    libraryDependencies += "org.scalatest" %% "scalatest" % scalaTestVersion % "it,test",
     headers := Map(
       "sbt" -> Apache2_0("2016", "CGnal S.p.A."),
       "scala" -> Apache2_0("2016", "CGnal S.p.A."),
@@ -173,7 +173,7 @@ mappings in Universal := {
     case (f, n) =>
       !n.endsWith(s"${organization.value}.${name.value}-${version.value}.jar")
   }
-  val fatJar: File = new File(s"${System.getProperty("user.dir")}/assembly/target/scala-2.10/$assemblyName-${version.value}.jar")
+  val fatJar: File = new File(s"${System.getProperty("user.dir")}/assembly/target/scala-2.11/$assemblyName-${version.value}.jar")
   filtered :+ (fatJar -> ("lib/" + fatJar.getName))
 }
 

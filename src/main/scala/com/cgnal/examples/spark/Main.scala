@@ -34,7 +34,7 @@ object Main extends App {
 
   val uberJarLocation = {
     val location = getJar(Main.getClass)
-    if (new File(location).isDirectory) s"${System.getProperty("user.dir")}/assembly/target/scala-2.10/spark-cdh-template-assembly-1.0.jar" else location
+    if (new File(location).isDirectory) s"${System.getProperty("user.dir")}/assembly/target/scala-2.11/spark-cdh-template-assembly-1.0.jar" else location
   }
 
   if (master.isEmpty) {
@@ -44,21 +44,16 @@ object Main extends App {
 
     if (yarn) {
       val _ = conf.
-        setMaster("yarn-client").
+        setMaster("yarn").
+        set("spark.submit.deployMode", "client").
         setAppName("spark-cdh5-template-yarn").
         setJars(List(uberJarLocation)).
-        set("spark.yarn.jar", "local:/opt/cloudera/parcels/CDH/lib/spark/assembly/lib/spark-assembly.jar").
-        //set("spark.executor.extraClassPath", "/opt/cloudera/parcels/CDH/jars/*"). //This is an hack I made I'm not sure why it works though
+        set("spark.yarn.jars", "local:/opt/cloudera/parcels/SPARK2-2.0.0.cloudera.beta1-1.cdh5.7.0.p0.108015/lib/spark2/jars/*").
         set("spark.serializer", "org.apache.spark.serializer.KryoSerializer").
         set("spark.io.compression.codec", "lzf").
-        set("spark.speculation", "true").
-        set("spark.shuffle.manager", "sort").
-        set("spark.shuffle.service.enabled", "true").
-        set("spark.dynamicAllocation.enabled", "true").
-        set("spark.dynamicAllocation.initialExecutors", Integer.toString(initialExecutors)).
-        set("spark.dynamicAllocation.minExecutors", Integer.toString(minExecutors)).
+        set("spark.executor.instances", Integer.toString(minExecutors)).
         set("spark.executor.cores", Integer.toString(1)).
-        set("spark.executor.memory", "256m")
+        set("spark.executor.memory", "512m")
     } else {
       val _ = conf.
         setAppName("spark-cdh5-template-local").
