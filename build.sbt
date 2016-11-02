@@ -69,11 +69,11 @@ wartremoverErrors ++= Seq(
 )
 
 
-val sparkVersion = "1.6.0-cdh5.8.0"
+val sparkVersion = "1.6.0-cdh5.9.0"
 
-val hadoopVersion = "2.6.0-cdh5.8.0"
+val hadoopVersion = "2.6.0-cdh5.9.0"
 
-val sparkAvroVersion = "1.1.0-cdh5.8.0"
+val sparkAvroVersion = "1.1.0-cdh5.9.0"
 
 val scalaTestVersion = "3.0.0"
 
@@ -123,7 +123,7 @@ libraryDependencies ++= Seq(
 ) ++ assemblyDependencies(assemblyDependenciesScope)
 
 //http://stackoverflow.com/questions/18838944/how-to-add-provided-dependencies-back-to-run-test-tasks-classpath/21803413#21803413
-run in Compile <<= Defaults.runTask(fullClasspath in Compile, mainClass in(Compile, run), runner in(Compile, run))
+run in Compile := Defaults.runTask(fullClasspath in Compile, mainClass in(Compile, run), runner in(Compile, run))
 
 //http://stackoverflow.com/questions/27824281/sparksql-missingrequirementerror-when-registering-table
 fork := true
