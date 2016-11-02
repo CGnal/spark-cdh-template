@@ -17,6 +17,7 @@
 package com.cgnal.examples.spark
 
 import java.io.File
+import java.net.InetAddress
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.yarn.client.api.YarnClient
@@ -68,33 +69,36 @@ object Main extends App {
 
   val sparkContext = new SparkContext(conf)
 
-  val yarnClient = YarnClient.createYarnClient()
-  yarnClient.init(new Configuration())
-  yarnClient.start()
+  def getSystemRDD(sparkConf: SparkContext): RDD[(Int, (String, String))] = {
+    val yarnClient = YarnClient.createYarnClient()
+    yarnClient.init(new Configuration())
+    yarnClient.start()
 
-  val numNodeManagers: Int = yarnClient.getYarnClusterMetrics.getNumActiveNodeManagers
+    val numNodeManagers: Int = yarnClient.getYarnClusterMetrics.getNumActiveNodeManagers
 
-  val rdd: RDD[Int] = sparkContext.parallelize[Int](1 to numNodeManagers, numNodeManagers)
+    val rdd: RDD[Int] = sparkContext.parallelize[Int](1 to numNodeManagers, numNodeManagers)
 
-  rdd.mapPartitionsWithIndex[(Int, String)]((index, iterator) => new Iterator[(Int, String)] {
+    rdd.mapPartitionsWithIndex[(Int, (String, String))]((index, iterator) => new Iterator[(Int, (String, String))] {
 
-    @SuppressWarnings(Array("org.wartremover.warts.Var"))
-    var firstTime = true
+      @SuppressWarnings(Array("org.wartremover.warts.Var"))
+      var firstTime = true
 
-    @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-    override def hasNext: Boolean =
-      if (firstTime) {
-        firstTime = false
-        true
-      } else
-        firstTime
+      @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
+      override def hasNext: Boolean =
+        if (firstTime) {
+          firstTime = false
+          true
+        } else
+          firstTime
 
-    override def next(): (Int, String) = (index, {
-      import scala.language.postfixOps
-      import sys.process._
-      "hostname" !!
-    })
-  }, preservesPartitioning = true).collect().foreach(println(_))
+      override def next(): (Int, (String, String)) = (index, {
+        val address: InetAddress = InetAddress.getLocalHost()
+        (address.getHostAddress, address.getHostName)
+      })
+    }, preservesPartitioning = true)
+  }
+
+  getSystemRDD(sparkContext).collect().foreach(println(_))
 
   sparkContext.stop()
 
