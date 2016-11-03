@@ -69,16 +69,19 @@ object Main extends App {
 
   val sparkContext = new SparkContext(conf)
 
-  def getSystemRDD(sparkConf: SparkContext): RDD[(Int, (String, String))] = {
+  def getSystemRDD(sparkConf: SparkContext): RDD[(String, String)] = {
+
     val yarnClient = YarnClient.createYarnClient()
     yarnClient.init(new Configuration())
     yarnClient.start()
 
-    val numNodeManagers: Int = yarnClient.getYarnClusterMetrics.getNumActiveNodeManagers
+    val numNodeManagers = yarnClient.getYarnClusterMetrics.getNumActiveNodeManagers
+
+    yarnClient.stop()
 
     val rdd: RDD[Int] = sparkContext.parallelize[Int](1 to numNodeManagers, numNodeManagers)
 
-    rdd.mapPartitionsWithIndex[(Int, (String, String))]((index, iterator) => new Iterator[(Int, (String, String))] {
+    rdd.mapPartitions[(String, String)](iterator => new Iterator[(String, String)] {
 
       @SuppressWarnings(Array("org.wartremover.warts.Var"))
       var firstTime = true
@@ -91,10 +94,10 @@ object Main extends App {
         } else
           firstTime
 
-      override def next(): (Int, (String, String)) = (index, {
+      override def next(): (String, String) = {
         val address: InetAddress = InetAddress.getLocalHost()
         (address.getHostAddress, address.getHostName)
-      })
+      }
     }, preservesPartitioning = true)
   }
 
