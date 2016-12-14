@@ -9,11 +9,7 @@ version in ThisBuild := "1.0"
 
 val assemblyName = "spark-cdh-template-assembly"
 
-scalaVersion := "2.10.6"
-
-ivyScala := ivyScala.value map {
-  _.copy(overrideScalaVersion = true)
-}
+scalaVersion in ThisBuild := "2.11.8"
 
 scalariformSettings
 
@@ -69,13 +65,13 @@ wartremoverErrors ++= Seq(
 )
 
 
-val sparkVersion = "1.6.0-cdh5.9.0"
+val sparkVersion = "2.0.0.cloudera1"
 
 val hadoopVersion = "2.6.0-cdh5.9.0"
 
-val sparkAvroVersion = "1.1.0-cdh5.9.0"
+val sparkAvroVersion = "3.1.0"
 
-val scalaTestVersion = "3.0.0"
+val scalaTestVersion = "3.0.1"
 
 resolvers ++= Seq(
   "cloudera" at "https://repository.cloudera.com/artifactory/cloudera-repos/"
@@ -93,7 +89,7 @@ val sparkExcludes =
     exclude("org.apache.hadoop", "hadoop-yarn-server-web-proxy")
 
 val assemblyDependencies = (scope: String) => Seq(
-  sparkExcludes("org.apache.spark" %% "spark-streaming-kafka" % sparkVersion % scope)
+  sparkExcludes("org.apache.spark" %% "spark-streaming-kafka-0-8" % sparkVersion % scope)
 )
 
 val hadoopClientExcludes =
@@ -123,7 +119,7 @@ libraryDependencies ++= Seq(
 ) ++ assemblyDependencies(assemblyDependenciesScope)
 
 //http://stackoverflow.com/questions/18838944/how-to-add-provided-dependencies-back-to-run-test-tasks-classpath/21803413#21803413
-run in Compile := Defaults.runTask(fullClasspath in Compile, mainClass in(Compile, run), runner in(Compile, run))
+//run in Compile := Defaults.runTask(fullClasspath in Compile, mainClass in(Compile, run), runner in(Compile, run))
 
 //http://stackoverflow.com/questions/27824281/sparksql-missingrequirementerror-when-registering-table
 fork := true
@@ -134,7 +130,7 @@ lazy val root = (project in file(".")).
   configs(IntegrationTest).
   settings(Defaults.itSettings: _*).
   settings(
-    libraryDependencies += "org.scalatest" % "scalatest_2.10" % scalaTestVersion % "it,test",
+    libraryDependencies += "org.scalatest" %% "scalatest" % scalaTestVersion % "it,test",
     headers := Map(
       "sbt" -> Apache2_0("2016", "CGnal S.p.A."),
       "scala" -> Apache2_0("2016", "CGnal S.p.A."),
@@ -148,9 +144,6 @@ lazy val root = (project in file(".")).
 
 lazy val projectAssembly = (project in file("assembly")).
   settings(
-    ivyScala := ivyScala.value map {
-      _.copy(overrideScalaVersion = true)
-    },
     assemblyMergeStrategy in assembly := {
       case "org/apache/spark/unused/UnusedStubClass.class" => MergeStrategy.last
       case x =>

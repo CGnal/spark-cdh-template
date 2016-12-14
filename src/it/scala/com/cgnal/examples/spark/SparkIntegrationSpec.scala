@@ -18,20 +18,16 @@ package com.cgnal.examples.spark
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
-import org.apache.spark.sql.SQLContext
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.SparkConf
+import org.apache.spark.sql.SparkSession
 import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
 
 class SparkIntegrationSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
 
   @SuppressWarnings(Array("org.wartremover.warts.Var"))
-  var sparkContext: SparkContext = _
+  var sparkSession: SparkSession = _
 
-  def getJar(klass: Class[_]): String = {
-    val codeSource = klass.getProtectionDomain.getCodeSource
-    codeSource.getLocation.getPath
-  }
-
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   override def beforeAll(): Unit = {
 
     val initialExecutors = 4
@@ -42,14 +38,13 @@ class SparkIntegrationSpec extends WordSpec with MustMatchers with BeforeAndAfte
 
     hadoop_conf_dir.fold(Predef.assert(false, "please set the HADOOP_CONF_DIR env variable"))(addPath(_))
 
-    val uberJarLocation = s"${System.getProperty("user.dir")}/assembly/target/scala-2.10/spark-cdh-template-assembly-1.0.jar"
+    val uberJarLocation = s"${System.getProperty("user.dir")}/assembly/target/scala-2.11/spark-cdh-template-assembly-1.0.jar"
 
     val conf = new SparkConf().
       setMaster("yarn-client").
       setAppName("spark-cdh5-template-yarn").
       setJars(List(uberJarLocation)).
-      set("spark.yarn.jar", "local:/opt/cloudera/parcels/CDH/lib/spark/assembly/lib/spark-assembly.jar").
-      set("spark.executor.extraClassPath", "/opt/cloudera/parcels/CDH/jars/*").
+      set("spark.yarn.jars", "local:/opt/cloudera/parcels/SPARK2-2.0.0.cloudera1-1.cdh5.7.0.p0.113931/lib/spark2/jars/*").
       set("spark.serializer", "org.apache.spark.serializer.KryoSerializer").
       set("spark.io.compression.codec", "lzf").
       set("spark.speculation", "true").
@@ -59,9 +54,9 @@ class SparkIntegrationSpec extends WordSpec with MustMatchers with BeforeAndAfte
       set("spark.dynamicAllocation.initialExecutors", Integer.toString(initialExecutors)).
       set("spark.dynamicAllocation.minExecutors", Integer.toString(minExecutors)).
       set("spark.executor.cores", Integer.toString(1)).
-      set("spark.executor.memory", "256m")
+      set("spark.executor.memory", "512m")
 
-    sparkContext = new SparkContext(conf)
+    sparkSession = SparkSession.builder().config(conf).getOrCreate()
   }
 
   "Spark" must {
@@ -81,21 +76,20 @@ class SparkIntegrationSpec extends WordSpec with MustMatchers with BeforeAndAfte
 
       import com.databricks.spark.avro._
 
-      val sqlContext = new SQLContext(sparkContext)
+      val data = sparkSession.read.avro(input)
 
-      val data = sqlContext.read.avro(input)
+      data.createOrReplaceTempView("test")
 
-      data.registerTempTable("test")
-
-      val res = sqlContext.sql("select * from test where a < 10")
+      val res = sparkSession.sql("select * from test where a < 10")
 
       res.collect().toList.toString must
         be("List([0,CIAO0], [1,CIAO1], [2,CIAO2], [3,CIAO3], [4,CIAO4], [5,CIAO5], [6,CIAO6], [7,CIAO7], [8,CIAO8], [9,CIAO9])")
     }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   override def afterAll(): Unit = {
-    sparkContext.stop()
+    sparkSession.stop()
   }
 
 }

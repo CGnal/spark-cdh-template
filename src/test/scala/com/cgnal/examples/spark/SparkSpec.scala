@@ -21,8 +21,8 @@ import org.apache.avro.mapred.{ AvroInputFormat, AvroWrapper }
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.io.NullWritable
-import org.apache.spark.sql.SQLContext
-import org.apache.spark.{ SparkConf, SparkContext }
+import org.apache.spark.SparkConf
+import org.apache.spark.sql.SparkSession
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 
 @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
@@ -31,30 +31,29 @@ final case class Person(name: String, age: Int)
 class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
 
   @SuppressWarnings(Array("org.wartremover.warts.Var"))
-  var sparkContext: SparkContext = _
+  var sparkSession: SparkSession = _
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   override def beforeAll(): Unit = {
     val conf = new SparkConf().
       setAppName("spark-cdh5-template-local-test").
       setMaster("local[16]")
-    sparkContext = new SparkContext(conf)
+    sparkSession = SparkSession.builder().config(conf).getOrCreate()
     ()
   }
 
   "Spark" must {
     "load an avro file as a schema rdd correctly" in {
 
-      val sqlContext = new SQLContext(sparkContext)
-
       val input = s"file://${System.getProperty("user.dir")}/src/test/resources/test.avro"
 
       import com.databricks.spark.avro._
 
-      val data = sqlContext.read.avro(input)
+      val data = sparkSession.read.avro(input)
 
-      data.registerTempTable("test")
+      data.createOrReplaceTempView("test")
 
-      val res = sqlContext.sql("select * from test where a < 10")
+      val res = sparkSession.sql("select * from test where a < 10")
 
       res.collect().toList.toString must
         be("List([0,CIAO0], [1,CIAO1], [2,CIAO2], [3,CIAO3], [4,CIAO4], [5,CIAO5], [6,CIAO6], [7,CIAO7], [8,CIAO8], [9,CIAO9])")
@@ -66,7 +65,7 @@ class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
 
       val input = s"file://${System.getProperty("user.dir")}/src/test/resources/test.avro"
 
-      val rdd = sparkContext.hadoopFile[AvroWrapper[GenericRecord], NullWritable](
+      val rdd = sparkSession.sparkContext.hadoopFile[AvroWrapper[GenericRecord], NullWritable](
         input,
         classOf[AvroInputFormat[GenericRecord]],
         classOf[AvroWrapper[GenericRecord]],
@@ -82,9 +81,10 @@ class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
   "Spark" must {
     "save an schema rdd as an avro file correctly" in {
 
-      val sqlContext = new SQLContext(sparkContext)
+      val spark = sparkSession
 
-      import sqlContext.implicits._
+      import com.databricks.spark.avro._
+      import spark.implicits._
 
       val output = s"file://${System.getProperty("user.dir")}/tmp/test.avro"
 
@@ -95,25 +95,23 @@ class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
       if (fileSystem.exists(dir)) {
         val _ = fileSystem.delete(dir, true)
       }
-
       val peopleList: List[Person] = List(Person("David", 50), Person("Ruben", 14), Person("Giuditta", 12), Person("Vita", 19))
       @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
-      val people = sparkContext.parallelize[Person](peopleList).toDF()
-      people.registerTempTable("people")
+      val people = sparkSession.sparkContext.parallelize[Person](peopleList).toDF()
+      people.createOrReplaceTempView("people")
 
-      val teenagers = sqlContext.sql("SELECT * FROM people WHERE age >= 13 AND age <= 19")
-      import com.databricks.spark.avro._
+      val teenagers = sparkSession.sql("SELECT * FROM people WHERE age >= 13 AND age <= 19")
       teenagers.write.avro(output)
       //Now I reload the file to check if everything is fine
-      import com.databricks.spark.avro._
-      val data = sqlContext.read.avro(output)
-      data.registerTempTable("teenagers")
-      sqlContext.sql("select * from teenagers").collect().toList.toString must be("List([Ruben,14], [Vita,19])")
+      val data = sparkSession.read.avro(output)
+      data.createOrReplaceTempView("teenagers")
+      sparkSession.sql("select * from teenagers").collect().toList.toString must be("List([Ruben,14], [Vita,19])")
     }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   override def afterAll(): Unit = {
-    sparkContext.stop()
+    sparkSession.stop()
   }
 
 }
