@@ -119,7 +119,7 @@ libraryDependencies ++= Seq(
 ) ++ assemblyDependencies(assemblyDependenciesScope)
 
 //http://stackoverflow.com/questions/18838944/how-to-add-provided-dependencies-back-to-run-test-tasks-classpath/21803413#21803413
-//run in Compile := Defaults.runTask(fullClasspath in Compile, mainClass in(Compile, run), runner in(Compile, run))
+run in Compile := Defaults.runTask(fullClasspath in Compile, mainClass in(Compile, run), runner in(Compile, run))
 
 //http://stackoverflow.com/questions/27824281/sparksql-missingrequirementerror-when-registering-table
 fork := true
