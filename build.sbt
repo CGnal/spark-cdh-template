@@ -64,7 +64,6 @@ wartremoverErrors ++= Seq(
   Wart.While
 )
 
-
 val sparkVersion = "2.0.0.cloudera1"
 
 val hadoopVersion = "2.6.0-cdh5.9.0"
@@ -77,7 +76,7 @@ resolvers ++= Seq(
   "cloudera" at "https://repository.cloudera.com/artifactory/cloudera-repos/"
 )
 
-val isALibrary = false //this is a library project
+val isALibrary = true //this is a library project
 
 val sparkExcludes =
   (moduleId: ModuleID) => moduleId.
@@ -118,6 +117,17 @@ libraryDependencies ++= Seq(
   hadoopClientExcludes("org.apache.hadoop" % "hadoop-client" % hadoopVersion % hadoopDependenciesScope)
 ) ++ assemblyDependencies(assemblyDependenciesScope)
 
+//Trick to make Intellij/IDEA happy
+//We set all provided dependencies to none, so that they are included in the classpath of root module
+libraryDependencies := libraryDependencies.value.map{
+  module =>
+    if (module.configurations.equals(Some("provided"))) {
+      module.copy(configurations = None)
+    } else {
+      module
+    }
+}
+
 //http://stackoverflow.com/questions/18838944/how-to-add-provided-dependencies-back-to-run-test-tasks-classpath/21803413#21803413
 run in Compile := Defaults.runTask(fullClasspath in Compile, mainClass in(Compile, run), runner in(Compile, run))
 
@@ -130,7 +140,6 @@ lazy val root = (project in file(".")).
   configs(IntegrationTest).
   settings(Defaults.itSettings: _*).
   settings(
-    libraryDependencies += "org.scalatest" %% "scalatest" % scalaTestVersion % "it,test",
     headers := Map(
       "sbt" -> Apache2_0("2016", "CGnal S.p.A."),
       "scala" -> Apache2_0("2016", "CGnal S.p.A."),
@@ -144,6 +153,7 @@ lazy val root = (project in file(".")).
 
 lazy val projectAssembly = (project in file("assembly")).
   settings(
+    assemblyOption in assembly := (assemblyOption in assembly).value.copy(includeScala = false),
     assemblyMergeStrategy in assembly := {
       case "org/apache/spark/unused/UnusedStubClass.class" => MergeStrategy.last
       case x =>
