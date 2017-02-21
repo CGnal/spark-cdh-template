@@ -30,7 +30,7 @@ final case class Person(name: String, age: Int)
 
 class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
 
-  @SuppressWarnings(Array("org.wartremover.warts.Var"))
+  @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Null"))
   var sparkSession: SparkSession = _
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
