@@ -25,11 +25,12 @@ import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 
+@SuppressWarnings(Array("org.wartremover.warts.Overloading"))
 final case class Person(name: String, age: Int)
 
 class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
 
-  @SuppressWarnings(Array("org.wartremover.warts.Var"))
+  @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Null"))
   var sparkSession: SparkSession = _
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
@@ -81,6 +82,8 @@ class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
     "save an schema rdd as an avro file correctly" in {
 
       val spark = sparkSession
+
+      import com.databricks.spark.avro._
       import spark.implicits._
 
       val output = s"file://${System.getProperty("user.dir")}/tmp/test.avro"
@@ -92,17 +95,14 @@ class SparkSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
       if (fileSystem.exists(dir)) {
         val _ = fileSystem.delete(dir, true)
       }
-
       val peopleList: List[Person] = List(Person("David", 50), Person("Ruben", 14), Person("Giuditta", 12), Person("Vita", 19))
       @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
       val people = sparkSession.sparkContext.parallelize[Person](peopleList).toDF()
       people.createOrReplaceTempView("people")
 
       val teenagers = sparkSession.sql("SELECT * FROM people WHERE age >= 13 AND age <= 19")
-      import com.databricks.spark.avro._
       teenagers.write.avro(output)
       //Now I reload the file to check if everything is fine
-      import com.databricks.spark.avro._
       val data = sparkSession.read.avro(output)
       data.createOrReplaceTempView("teenagers")
       sparkSession.sql("select * from teenagers").collect().toList.toString must be("List([Ruben,14], [Vita,19])")
